@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESPP Plan Modeler — Section 423</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"></script>
+<style>
+:root {
+    --bg:#f0f2f5;--card:#fff;--header-bg:#1a2744;
+    --primary:#2563eb;--primary-light:#dbeafe;--primary-dark:#1d4ed8;
+    --green:#16a34a;--green-light:#dcfce7;--red:#dc2626;--red-light:#fee2e2;
+    --amber:#d97706;--amber-light:#fef3c7;
+    --text:#1e293b;--text2:#64748b;--text3:#94a3b8;
+    --border:#e2e8f0;--radius:10px;--shadow:0 1px 3px rgba(0,0,0,.08);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+
+.app-header{background:var(--header-bg);color:#fff;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.app-header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.app-header .subtitle{font-size:13px;color:rgba(255,255,255,.6)}
+.badge{display:inline-block;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px}
+
+.container{max-width:1440px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:4px;background:var(--card);padding:6px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow-x:auto}
+.tab{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border:none;background:transparent;color:var(--text2);transition:all .2s}
+.tab:hover{background:var(--bg);color:var(--text)}
+.tab.active{background:var(--primary);color:#fff}
+.tab-content{display:none}.tab-content.active{display:block}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+.card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.card h2{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.card h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.form-group input,.form-group select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:#fff;transition:border .2s}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.form-hint{font-size:11px;color:var(--text3);margin-top:3px}
+
+.kpi{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
+.kpi.green{border-left-color:var(--green)}.kpi.red{border-left-color:var(--red)}.kpi.amber{border-left-color:var(--amber)}
+.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:4px}
+.kpi-value{font-size:26px;font-weight:800;color:var(--text)}
+.kpi-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+tbody td{padding:10px 12px;border-bottom:1px solid #f1f5f9}
+tbody tr:hover{background:#f8fafc}
+.text-right{text-align:right}.text-green{color:var(--green);font-weight:600}.text-red{color:var(--red);font-weight:600}.text-amber{color:var(--amber);font-weight:600}
+
+.chart-box{background:var(--card);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow)}
+.chart-box h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.chart-box canvas{max-height:320px}
+
+.btn{padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-danger{background:var(--red);color:#fff;padding:6px 12px;font-size:12px;border-radius:6px;border:none;cursor:pointer}
+.btn-add{background:var(--green);color:#fff;padding:8px 16px;font-size:12px;border-radius:6px;border:none;cursor:pointer;font-weight:600}
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+.info-box{background:var(--primary-light);border:1px solid #bfdbfe;border-radius:8px;padding:14px 18px;font-size:13px;color:#1e40af;margin-bottom:16px}
+.warn-box{background:var(--amber-light);border:1px solid #fde68a;border-radius:8px;padding:14px 18px;font-size:13px;color:#92400e;margin-bottom:16px}
+
+.compare-header{display:grid;grid-template-columns:2fr 1fr 1fr;gap:0;background:var(--header-bg);color:#fff;border-radius:var(--radius) var(--radius) 0 0}
+.compare-header div{padding:14px 18px;font-weight:600;font-size:13px}
+.compare-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:0;border-bottom:1px solid var(--border)}
+.compare-row div{padding:12px 18px;font-size:13px}
+.compare-row:nth-child(even){background:#f8fafc}
+.compare-row .label{font-weight:600;color:var(--text2)}
+
+.scenario-card{border:2px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;transition:all .2s;cursor:pointer}
+.scenario-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.scenario-card h4{font-size:14px;margin-bottom:6px}
+.scenario-card p{font-size:12px;color:var(--text2)}
+
+.section-divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+/* Toggle switch */
+.toggle-group{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:2px;margin-bottom:12px}
+.toggle-btn{flex:1;padding:8px 16px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s}
+.toggle-btn.active{background:var(--primary);color:#fff}
+
+/* Period rows */
+.period-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;padding:10px 0;border-bottom:1px solid var(--border)}
+.period-row:last-child{border-bottom:none}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.tag-blue{background:var(--primary-light);color:var(--primary)}
+.tag-green{background:var(--green-light);color:var(--green)}
+.tag-amber{background:var(--amber-light);color:var(--amber)}
+
+@media print{.tabs,.actions{display:none}.tab-content{display:block!important;page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+    <div>
+        <h1>ESPP Plan Modeler <span class="badge" id="headerBadge">Section 423</span></h1>
+        <div class="subtitle">Universal Employee Stock Purchase Plan Modeling Tool for US Participants</div>
+    </div>
+    <div style="text-align:right">
+        <div style="font-size:13px;font-weight:600;" id="headerCompany">Your Company</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);" id="headerTicker"></div>
+    </div>
+</div>
+
+<div class="container">
+<div class="tabs" id="tabBar">
+    <button class="tab active" data-tab="config">Plan Configuration</button>
+    <button class="tab" data-tab="purchase">Purchase Calculator</button>
+    <button class="tab" data-tab="projection">Multi-Period Projection</button>
+    <button class="tab" data-tab="tax">Tax Analyzer</button>
+    <button class="tab" data-tab="scenario">Scenario Analysis</button>
+    <button class="tab" data-tab="limit">§25K Limit Calculator</button>
+</div>
+
+<!-- ===================== TAB 1: PLAN CONFIGURATION ===================== -->
+<div class="tab-content active" id="tab-config">
+<div class="grid-2">
+<div class="card">
+    <h2>Plan Design</h2>
+    <div class="info-box">Configure your ESPP plan. All parameters are editable — change any value to model a different plan design.</div>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" id="companyName" value="" placeholder="e.g. Acme Corp" oninput="updateHeader()">
+        </div>
+        <div class="form-group">
+            <label>Ticker Symbol</label>
+            <input type="text" id="ticker" value="" placeholder="e.g. ACME" oninput="updateHeader()" style="text-transform:uppercase;">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Plan Type</label>
+            <select id="planType" onchange="togglePlanType()">
+                <option value="423" selected>Section 423 Qualified</option>
+                <option value="non423">Non-Qualified (Non-423)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Discount Rate (%)</label>
+            <input type="number" id="discountRate" value="15" min="0" max="50" step="0.5">
+        </div>
+    </div>
+
+    <hr class="section-divider">
+    <h3>Discount Basis / Lookback</h3>
+    <div class="form-group">
+        <label>Purchase Price Calculated As</label>
+        <select id="discountBasis">
+            <option value="purchase">Discount × FMV on Purchase Date only (No Lookback)</option>
+            <option value="lower" selected>Discount × Lower of Offering Date or Purchase Date FMV (Lookback)</option>
+            <option value="offering">Discount × FMV on Offering Date only</option>
+        </select>
+        <div class="form-hint">Most common: Lookback provision — discount applied to lower of start or end price</div>
+    </div>
+
+    <hr class="section-divider">
+    <h3>Offering Period Schedule</h3>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Offering Period Duration (Months)</label>
+            <input type="number" id="offeringMonths" value="6" min="1" max="27" step="1">
+            <div class="form-hint">Common: 6 months, 12 months, or 24 months</div>
+        </div>
+        <div class="form-group">
+            <label>Purchase Periods per Offering</label>
+            <select id="purchasePeriodsPerOffering">
+                <option value="1" selected>1 (single purchase at end)</option>
+                <option value="2">2 (semi-annual purchases)</option>
+                <option value="4">4 (quarterly purchases)</option>
+                <option value="6">6 (bi-monthly purchases)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Offering Period Start Dates (Calendar)</label>
+        <div id="offeringDatesContainer"></div>
+        <button class="btn-add" onclick="addOfferingDate()" style="margin-top:8px">+ Add Offering Start Date</button>
+        <div class="form-hint">Add the actual calendar start dates for your offering periods</div>
+    </div>
+
+    <hr class="section-divider">
+    <h3>Contribution Limits</h3>
+    <div class="form-group">
+        <label>Contribution Mode</label>
+        <div class="toggle-group">
+            <button class="toggle-btn active" data-mode="pct" onclick="setContribMode('pct')">% of Compensation</button>
+            <button class="toggle-btn" data-mode="dollar" onclick="setContribMode('dollar')">Fixed $ Amount</button>
+        </div>
+    </div>
+    <div id="contribPctFields">
+        <div class="form-row-3">
+            <div class="form-group">
+                <label>Min Contribution (%)</label>
+                <input type="number" id="minContribPct" value="1" min="0" max="100" step="0.5">
+            </div>
+            <div class="form-group">
+                <label>Max Contribution (%)</label>
+                <input type="number" id="maxContribPct" value="15" min="0" max="100" step="0.5">
+            </div>
+            <div class="form-group">
+                <label>Increment (%)</label>
+                <input type="number" id="contribIncrementPct" value="1" min="0.1" max="5" step="0.1">
+            </div>
+        </div>
+    </div>
+    <div id="contribDollarFields" style="display:none;">
+        <div class="form-row-3">
+            <div class="form-group">
+                <label>Min per Paycheck ($)</label>
+                <input type="number" id="minContribDollar" value="10" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label>Max per Paycheck ($)</label>
+                <input type="number" id="maxContribDollar" value="1000" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label>Increment ($)</label>
+                <input type="number" id="contribIncrementDollar" value="1" min="1" step="1">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group" id="annualLimitGroup">
+        <label>§423 Annual FMV Limit ($)</label>
+        <input type="number" id="annualLimit" value="25000" step="1000">
+        <div class="form-hint">IRS statutory maximum per calendar year ($25,000)</div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label>Share Purchase Type</label>
+            <select id="shareType">
+                <option value="fractional" selected>Fractional Shares Allowed</option>
+                <option value="whole">Whole Shares Only (remainder refunded)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Reset Provision (24-mo plans)</label>
+            <select id="resetProvision">
+                <option value="none" selected>No Reset</option>
+                <option value="yes">Yes — Reset to new Offering Date if price drops</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Employee Profile</h2>
+    <div class="form-group">
+        <label>Annual Base Salary (USD)</label>
+        <input type="number" id="salary" value="100000" min="0" step="5000">
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Other Eligible Compensation (Annual)</label>
+            <input type="number" id="otherComp" value="0" min="0" step="1000">
+            <div class="form-hint">Overtime, bonuses, commissions</div>
+        </div>
+        <div class="form-group">
+            <label>Total Eligible Compensation</label>
+            <input type="text" id="totalComp" readonly style="background:#f8fafc;font-weight:700;">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Pay Frequency</label>
+        <select id="payFrequency">
+            <option value="26" selected>Bi-Weekly (26 paychecks/yr)</option>
+            <option value="24">Semi-Monthly (24 paychecks/yr)</option>
+            <option value="52">Weekly (52 paychecks/yr)</option>
+            <option value="12">Monthly (12 paychecks/yr)</option>
+        </select>
+    </div>
+
+    <div class="form-group" id="contribSliderGroup">
+        <label id="contribSliderLabel">Contribution Rate (%)</label>
+        <input type="range" id="contribSlider" min="1" max="15" step="1" value="10" oninput="updateContribDisplay()">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:4px;">
+            <span id="contribSliderMin">1%</span>
+            <span id="contribSliderVal" style="font-weight:700;color:var(--primary);">10%</span>
+            <span id="contribSliderMax">15%</span>
+        </div>
+    </div>
+    <div class="form-group" id="contribDollarSliderGroup" style="display:none;">
+        <label>Contribution per Paycheck ($)</label>
+        <input type="range" id="contribDollarSlider" min="10" max="1000" step="1" value="500" oninput="updateContribDisplay()">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:4px;">
+            <span id="contribDollarMin">$10</span>
+            <span id="contribDollarVal" style="font-weight:700;color:var(--primary);">$500</span>
+            <span id="contribDollarMax">$1,000</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Computed Per-Period Contribution</label>
+        <input type="text" id="computedContrib" readonly style="background:var(--green-light);font-weight:700;color:var(--green);">
+    </div>
+
+    <hr class="section-divider">
+    <h3>Stock Price Assumptions</h3>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Current Stock Price (USD)</label>
+            <input type="number" id="currentPrice" value="50.00" min="0.01" step="0.01">
+        </div>
+        <div class="form-group">
+            <label>Expected Annual Growth (%)</label>
+            <input type="number" id="stockGrowth" value="8" step="0.5">
+        </div>
+    </div>
+
+    <hr class="section-divider">
+    <h3>Tax Information</h3>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Federal Tax Bracket (%)</label>
+            <select id="fedTaxRate">
+                <option value="10">10%</option><option value="12">12%</option>
+                <option value="22" selected>22%</option><option value="24">24%</option>
+                <option value="32">32%</option><option value="35">35%</option><option value="37">37%</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>State Tax Rate (%)</label>
+            <input type="number" id="stateTaxRate" value="5" min="0" max="15" step="0.1">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label>FICA Rate (%)</label>
+            <input type="number" id="ficaRate" value="7.65" min="0" max="10" step="0.01">
+        </div>
+        <div class="form-group">
+            <label>Long-Term Cap Gains Rate (%)</label>
+            <select id="ltcgRate">
+                <option value="0">0%</option><option value="15" selected>15%</option><option value="20">20%</option>
+            </select>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="btn btn-primary" onclick="runAllCalculations()">Calculate All Tabs</button>
+        <button class="btn btn-outline" onclick="resetDefaults()">Reset to Defaults</button>
+        <button class="btn btn-outline" onclick="exportJSON()">Export Config</button>
+        <button class="btn btn-outline" onclick="importJSON()">Import Config</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+    </div>
+</div>
+</div>
+</div>
+
+<!-- ===================== TAB 2: PURCHASE CALCULATOR ===================== -->
+<div class="tab-content" id="tab-purchase">
+    <div class="grid-4" id="purchaseKPIs"></div>
+    <div style="height:20px"></div>
+    <div class="grid-2">
+        <div class="card">
+            <h2>Single Offering Period Purchase</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Stock Price at Offering Date</label>
+                    <input type="number" id="calcOfferingPrice" value="50.00" min="0.01" step="0.01" onchange="calcPurchase()">
+                </div>
+                <div class="form-group">
+                    <label>Stock Price at Purchase Date</label>
+                    <input type="number" id="calcPurchasePrice" value="55.00" min="0.01" step="0.01" onchange="calcPurchase()">
+                </div>
+            </div>
+            <div id="purchaseResult"></div>
+        </div>
+        <div class="chart-box">
+            <h3>Value Breakdown</h3>
+            <canvas id="purchaseChart"></canvas>
+        </div>
+    </div>
+    <div style="height:20px"></div>
+    <div class="card">
+        <h2>Per-Paycheck Deduction Schedule</h2>
+        <div id="paycheckTable"></div>
+    </div>
+</div>
+
+<!-- ===================== TAB 3: MULTI-PERIOD PROJECTION ===================== -->
+<div class="tab-content" id="tab-projection">
+    <div class="grid-4" id="projKPIs"></div>
+    <div style="height:20px"></div>
+    <div class="grid-2">
+        <div class="chart-box"><h3>Cumulative Investment vs Market Value</h3><canvas id="projChart"></canvas></div>
+        <div class="chart-box"><h3>Per-Period Discount Gained</h3><canvas id="discountChart"></canvas></div>
+    </div>
+    <div style="height:20px"></div>
+    <div class="card">
+        <h2>Period-by-Period Detail</h2>
+        <div class="form-group" style="max-width:200px;">
+            <label>Projection Years</label>
+            <select id="projYears" onchange="runProjection()">
+                <option value="1">1 Year</option><option value="2">2 Years</option>
+                <option value="3" selected>3 Years</option><option value="5">5 Years</option><option value="10">10 Years</option>
+            </select>
+        </div>
+        <div id="projTable" class="table-wrap"></div>
+    </div>
+</div>
+
+<!-- ===================== TAB 4: TAX ANALYZER ===================== -->
+<div class="tab-content" id="tab-tax">
+    <div id="taxInfoBox"></div>
+    <div class="grid-2">
+        <div class="card">
+            <h2>Disposition Scenario Inputs</h2>
+            <div class="form-row">
+                <div class="form-group"><label>FMV at Offering Date</label><input type="number" id="taxOfferingFMV" value="50.00" step="0.01" onchange="calcTax()"></div>
+                <div class="form-group"><label>FMV at Purchase Date</label><input type="number" id="taxPurchaseFMV" value="55.00" step="0.01" onchange="calcTax()"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Purchase Price (auto)</label><input type="text" id="taxPurchasePrice" readonly style="background:#f8fafc;font-weight:700;"></div>
+                <div class="form-group"><label>Shares Purchased</label><input type="number" id="taxShares" value="100" min="1" step="1" onchange="calcTax()"></div>
+            </div>
+            <div class="form-group"><label>Sale Price per Share</label><input type="number" id="taxSalePrice" value="65.00" step="0.01" onchange="calcTax()"></div>
+        </div>
+        <div class="card">
+            <h2>Tax Comparison Summary</h2>
+            <div id="taxKPIs" class="grid-2" style="margin-bottom:16px;"></div>
+            <div id="taxCompare"></div>
+        </div>
+    </div>
+    <div style="height:20px"></div>
+    <div class="grid-2">
+        <div class="chart-box"><h3>After-Tax Proceeds Comparison</h3><canvas id="taxChart"></canvas></div>
+        <div class="card"><h2>Detailed Tax Breakdown</h2><div id="taxDetail"></div></div>
+    </div>
+</div>
+
+<!-- ===================== TAB 5: SCENARIO ANALYSIS ===================== -->
+<div class="tab-content" id="tab-scenario">
+    <div class="grid-3" style="margin-bottom:20px;">
+        <div class="scenario-card selected" data-scenario="bull" onclick="selectScenario('bull')"><h4 style="color:var(--green);">Bull Market</h4><p>Stock rises steadily (+15%/yr)</p></div>
+        <div class="scenario-card" data-scenario="flat" onclick="selectScenario('flat')"><h4 style="color:var(--amber);">Flat / Sideways</h4><p>Stock stays near current price (±2%/yr)</p></div>
+        <div class="scenario-card" data-scenario="bear" onclick="selectScenario('bear')"><h4 style="color:var(--red);">Bear Market</h4><p>Stock declines (−10%/yr)</p></div>
+    </div>
+    <div class="grid-4" id="scenarioKPIs"></div>
+    <div style="height:20px"></div>
+    <div class="grid-2">
+        <div class="chart-box"><h3>All Scenarios — Cumulative Value</h3><canvas id="scenarioChart"></canvas></div>
+        <div class="chart-box"><h3>Effective Annualized Return</h3><canvas id="scenarioReturnChart"></canvas></div>
+    </div>
+    <div style="height:20px"></div>
+    <div class="card"><h2>Scenario Detail Table</h2><div id="scenarioTable" class="table-wrap"></div></div>
+</div>
+
+<!-- ===================== TAB 6: §25K LIMIT ===================== -->
+<div class="tab-content" id="tab-limit">
+    <div id="limitInfoBox"></div>
+    <div class="grid-2">
+        <div class="card">
+            <h2>Limit Calculator</h2>
+            <div class="form-row">
+                <div class="form-group"><label>FMV at Offering Date</label><input type="number" id="limitFMV" value="50.00" step="0.01" onchange="calcLimit()"></div>
+                <div class="form-group"><label>Offering Periods per Year</label><input type="number" id="limitPeriods" value="2" min="1" max="12" onchange="calcLimit()"></div>
+            </div>
+            <div id="limitResult"></div>
+        </div>
+        <div class="card">
+            <h2>Your Contribution vs Limit</h2>
+            <div id="limitComparison"></div>
+            <div style="height:16px"></div>
+            <canvas id="limitChart" style="max-height:260px;"></canvas>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+// ============================== STATE ==============================
+let contribMode = 'pct'; // 'pct' or 'dollar'
+let offeringDates = ['2026-01-01','2026-07-01'];
+let charts = {};
+let activeScenario = 'bull';
+const COLORS = ['#2563eb','#16a34a','#dc2626','#d97706','#8b5cf6','#06b6d4','#ec4899','#84cc16'];
+
+// ============================== TAB NAV ==============================
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+}));
+
+// ============================== HELPERS ==============================
+const $ = id => document.getElementById(id);
+const fmtC = v => '$'+(v<0?'-':'')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtI = v => v.toLocaleString('en-US',{maximumFractionDigits:0});
+const fmtP = v => v.toFixed(2)+'%';
+const fmtS = v => v.toLocaleString('en-US',{minimumFractionDigits:4,maximumFractionDigits:4});
+const fmtDate = d => new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+function destroyChart(k){ if(charts[k]){charts[k].destroy();delete charts[k];} }
+
+function updateHeader(){
+    $('headerCompany').textContent = $('companyName').value || 'Your Company';
+    $('headerTicker').textContent = $('ticker').value ? 'Ticker: '+$('ticker').value.toUpperCase() : '';
+    $('headerBadge').textContent = $('planType').value==='423' ? 'Section 423' : 'Non-423';
+}
+
+function togglePlanType(){
+    const is423 = $('planType').value === '423';
+    $('annualLimitGroup').style.display = is423 ? 'block' : 'none';
+    updateHeader();
+}
+
+// ============================== OFFERING DATES ==============================
+function renderOfferingDates(){
+    const c = $('offeringDatesContainer');
+    c.innerHTML = '';
+    offeringDates.forEach((d,i) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:6px;';
+        const months = +$('offeringMonths').value;
+        const start = new Date(d+'T00:00:00');
+        const end = new Date(start); end.setMonth(end.getMonth()+months); end.setDate(end.getDate()-1);
+        row.innerHTML = `
+            <input type="date" value="${d}" onchange="offeringDates[${i}]=this.value;renderOfferingDates()" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;">
+            <span class="tag tag-blue">${months}mo → ends ${fmtDate(end.toISOString().slice(0,10))}</span>
+            ${offeringDates.length>1?`<button class="btn-danger" onclick="offeringDates.splice(${i},1);renderOfferingDates()">×</button>`:''}
+        `;
+        c.appendChild(row);
+    });
+}
+function addOfferingDate(){
+    const last = offeringDates[offeringDates.length-1];
+    const d = new Date(last+'T00:00:00');
+    d.setMonth(d.getMonth()+ +$('offeringMonths').value);
+    offeringDates.push(d.toISOString().slice(0,10));
+    renderOfferingDates();
+}
+
+// ============================== CONTRIBUTION MODE ==============================
+function setContribMode(mode){
+    contribMode = mode;
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.mode===mode));
+    $('contribPctFields').style.display = mode==='pct' ? 'block' : 'none';
+    $('contribDollarFields').style.display = mode==='dollar' ? 'block' : 'none';
+    $('contribSliderGroup').style.display = mode==='pct' ? 'block' : 'none';
+    $('contribDollarSliderGroup').style.display = mode==='dollar' ? 'block' : 'none';
+    syncContribSlider();
+    updateContribDisplay();
+}
+
+function syncContribSlider(){
+    if(contribMode==='pct'){
+        $('contribSlider').min = $('minContribPct').value;
+        $('contribSlider').max = $('maxContribPct').value;
+        $('contribSlider').step = $('contribIncrementPct').value;
+        $('contribSliderMin').textContent = $('minContribPct').value+'%';
+        $('contribSliderMax').textContent = $('maxContribPct').value+'%';
+    } else {
+        $('contribDollarSlider').min = $('minContribDollar').value;
+        $('contribDollarSlider').max = $('maxContribDollar').value;
+        $('contribDollarSlider').step = $('contribIncrementDollar').value;
+        $('contribDollarMin').textContent = '$'+fmtI(+$('minContribDollar').value);
+        $('contribDollarMax').textContent = '$'+fmtI(+$('maxContribDollar').value);
+    }
+}
+
+function updateContribDisplay(){
+    if(contribMode==='pct'){
+        $('contribSliderVal').textContent = $('contribSlider').value+'%';
+    } else {
+        $('contribDollarVal').textContent = '$'+fmtI(+$('contribDollarSlider').value);
+    }
+    computeContrib();
+}
+
+function computeContrib(){
+    const inp = getInputs();
+    $('computedContrib').value = fmtC(inp.contribPerPeriod) + ' per offering period (' + fmtC(inp.perPaycheck) + '/paycheck × ' + inp.paychecksPerPeriod + ')';
+}
+
+// ============================== GET ALL INPUTS ==============================
+function getInputs(){
+    const salary = +$('salary').value;
+    const other = +$('otherComp').value;
+    const totalComp = salary + other;
+    const discountRate = +$('discountRate').value/100;
+    const offeringMonths = +$('offeringMonths').value;
+    const purchasePeriods = +$('purchasePeriodsPerOffering').value;
+    const discountBasis = $('discountBasis').value;
+    const is423 = $('planType').value==='423';
+    const annualLimit = is423 ? +$('annualLimit').value : Infinity;
+    const currentPrice = +$('currentPrice').value;
+    const stockGrowth = +$('stockGrowth').value/100;
+    const fedTax = +$('fedTaxRate').value/100;
+    const stateTax = +$('stateTaxRate').value/100;
+    const fica = +$('ficaRate').value/100;
+    const ltcg = +$('ltcgRate').value/100;
+    const periodsPerYear = 12/offeringMonths;
+    const wholeShares = $('shareType').value==='whole';
+    const paychecksPerYear = +$('payFrequency').value;
+    const paychecksPerPeriod = Math.round(paychecksPerYear * offeringMonths / 12);
+
+    let contribPerPeriod, perPaycheck;
+    if(contribMode==='pct'){
+        const rate = +$('contribSlider').value/100;
+        contribPerPeriod = totalComp * rate * (offeringMonths/12);
+        perPaycheck = contribPerPeriod / paychecksPerPeriod;
+    } else {
+        perPaycheck = +$('contribDollarSlider').value;
+        contribPerPeriod = perPaycheck * paychecksPerPeriod;
+    }
+
+    $('totalComp').value = fmtC(totalComp);
+    return {salary,other,totalComp,discountRate,offeringMonths,purchasePeriods,discountBasis,is423,annualLimit,currentPrice,stockGrowth,fedTax,stateTax,fica,ltcg,periodsPerYear,wholeShares,paychecksPerYear,paychecksPerPeriod,contribPerPeriod,perPaycheck,contribMode};
+}
+
+function calcPP(offeringFMV, purchaseFMV, discount, basis){
+    let base;
+    if(basis==='lower') base = Math.min(offeringFMV, purchaseFMV);
+    else if(basis==='offering') base = offeringFMV;
+    else base = purchaseFMV;
+    return base * (1-discount);
+}
+
+function applyShareType(raw, whole){ return whole ? Math.floor(raw) : Math.floor(raw*10000)/10000; }
+
+// ============================== PURCHASE CALCULATOR ==============================
+function calcPurchase(){
+    const inp = getInputs();
+    const oFMV = +$('calcOfferingPrice').value;
+    const pFMV = +$('calcPurchasePrice').value;
+    const pp = calcPP(oFMV, pFMV, inp.discountRate, inp.discountBasis);
+    const maxByLimit = inp.is423 ? inp.annualLimit / oFMV / inp.periodsPerYear : Infinity;
+    const maxByContrib = inp.contribPerPeriod / pp;
+    const sharesRaw = Math.min(maxByContrib, maxByLimit);
+    const shares = applyShareType(sharesRaw, inp.wholeShares);
+    const cost = shares * pp;
+    const value = shares * pFMV;
+    const disc = value - cost;
+    const ret = cost > 0 ? (disc/cost)*100 : 0;
+    const refund = inp.contribPerPeriod - cost;
+
+    const basisLabel = inp.discountBasis==='lower'?'Lower of Offering/Purchase':'('+inp.discountBasis.charAt(0).toUpperCase()+inp.discountBasis.slice(1)+' Date)';
+
+    $('purchaseKPIs').innerHTML = `
+        <div class="kpi"><div class="kpi-label">Shares Purchased</div><div class="kpi-value">${fmtS(shares)}</div><div class="kpi-sub">${inp.wholeShares?'Whole shares only':'Fractional allowed'}</div></div>
+        <div class="kpi green"><div class="kpi-label">Instant Discount</div><div class="kpi-value">${fmtC(disc)}</div><div class="kpi-sub">${fmtP(ret)} instant return</div></div>
+        <div class="kpi"><div class="kpi-label">Total Cost (You Pay)</div><div class="kpi-value">${fmtC(cost)}</div><div class="kpi-sub">${fmtC(pp)}/share × ${fmtS(shares)}</div></div>
+        <div class="kpi amber"><div class="kpi-label">Market Value at Purchase</div><div class="kpi-value">${fmtC(value)}</div><div class="kpi-sub">${refund>0.01?'Refund: '+fmtC(refund):'No excess'}</div></div>
+    `;
+
+    $('purchaseResult').innerHTML = `<table style="margin-top:16px;"><tbody>
+        <tr><td style="font-weight:600;">Offering Date FMV</td><td class="text-right">${fmtC(oFMV)}</td></tr>
+        <tr><td style="font-weight:600;">Purchase Date FMV</td><td class="text-right">${fmtC(pFMV)}</td></tr>
+        <tr><td style="font-weight:600;">Discount Rate</td><td class="text-right">${(inp.discountRate*100).toFixed(1)}%</td></tr>
+        <tr><td style="font-weight:600;">Discount Basis</td><td class="text-right">${basisLabel}</td></tr>
+        <tr><td style="font-weight:600;">Price Basis Used</td><td class="text-right">${fmtC(inp.discountBasis==='lower'?Math.min(oFMV,pFMV):inp.discountBasis==='offering'?oFMV:pFMV)}</td></tr>
+        <tr><td style="font-weight:600;">Purchase Price/Share</td><td class="text-right text-green" style="font-weight:700;">${fmtC(pp)}</td></tr>
+        <tr><td style="font-weight:600;">Payroll Deductions</td><td class="text-right">${fmtC(inp.contribPerPeriod)} (${contribMode==='pct'?$('contribSlider').value+'% of comp':'$'+fmtI(+$('contribDollarSlider').value)+'/paycheck'})</td></tr>
+        ${inp.is423?`<tr><td style="font-weight:600;">§25K Limit Max Shares</td><td class="text-right">${fmtS(maxByLimit)}</td></tr>`:''}
+        <tr><td style="font-weight:600;">Contribution Max Shares</td><td class="text-right">${fmtS(maxByContrib)}</td></tr>
+        <tr><td style="font-weight:600;border-top:2px solid var(--border);">Shares Purchased</td><td class="text-right" style="font-weight:800;border-top:2px solid var(--border);">${fmtS(shares)}</td></tr>
+    </tbody></table>`;
+
+    destroyChart('purchase');
+    charts.purchase = new Chart($('purchaseChart').getContext('2d'),{type:'bar',data:{labels:['Your Cost','Discount','Market Value'],datasets:[{data:[cost,disc,value],backgroundColor:['#2563eb','#16a34a','#d97706'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtC(c.parsed.y)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+(v/1000).toFixed(1)+'K'}}}}});
+
+    // Paycheck table
+    let rows='';
+    for(let i=1;i<=inp.paychecksPerPeriod;i++) rows+=`<tr><td>${i}</td><td class="text-right">${fmtC(inp.perPaycheck)}</td><td class="text-right">${fmtC(inp.perPaycheck*i)}</td></tr>`;
+    $('paycheckTable').innerHTML=`<table><thead><tr><th>Paycheck #</th><th class="text-right">Deduction</th><th class="text-right">Cumulative</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ============================== PROJECTION ==============================
+function runProjection(){
+    const inp = getInputs();
+    const years = +$('projYears').value;
+    const totalPeriods = Math.round(years*inp.periodsPerYear);
+    const pGrowth = Math.pow(1+inp.stockGrowth, inp.offeringMonths/12)-1;
+    let rows=[],cumI=0,cumV=0,cumSh=0,cumD=0;
+    let cL=[],cI=[],cV=[],cD=[];
+    let price = inp.currentPrice;
+    for(let p=1;p<=totalPeriods;p++){
+        const oFMV=price, pFMV=price*(1+pGrowth);
+        const pp=calcPP(oFMV,pFMV,inp.discountRate,inp.discountBasis);
+        const maxL=inp.is423?inp.annualLimit/oFMV/inp.periodsPerYear:Infinity;
+        const sh=applyShareType(Math.min(inp.contribPerPeriod/pp,maxL),inp.wholeShares);
+        const cost=sh*pp, val=sh*pFMV, disc=val-cost;
+        cumI+=cost;cumSh+=sh;cumD+=disc;cumV=cumSh*pFMV;
+        const yr=Math.ceil(p/inp.periodsPerYear), piy=p-(yr-1)*inp.periodsPerYear;
+        const lbl=offeringDates.length>=p?fmtDate(offeringDates[p-1]):`Y${yr} P${piy}`;
+        cL.push(`Y${yr}P${piy}`);cI.push(+cumI.toFixed(2));cV.push(+cumV.toFixed(2));cD.push(+disc.toFixed(2));
+        rows.push({p,lbl:`Y${yr} P${piy}`,oFMV,pFMV,pp,sh,cost,val,disc,cumI,cumSh,cumV,cumD});
+        price=pFMV;
+    }
+    const last=rows[rows.length-1];
+    const totRet=((last.cumV-last.cumI)/last.cumI*100);
+    $('projKPIs').innerHTML=`
+        <div class="kpi"><div class="kpi-label">Total Invested</div><div class="kpi-value">${fmtC(last.cumI)}</div><div class="kpi-sub">${years} years</div></div>
+        <div class="kpi green"><div class="kpi-label">Portfolio Value</div><div class="kpi-value">${fmtC(last.cumV)}</div><div class="kpi-sub">${fmtP(totRet)} total return</div></div>
+        <div class="kpi green"><div class="kpi-label">Cumulative Discount</div><div class="kpi-value">${fmtC(last.cumD)}</div></div>
+        <div class="kpi"><div class="kpi-label">Total Shares</div><div class="kpi-value">${fmtS(last.cumSh)}</div><div class="kpi-sub">at ${fmtC(last.pFMV)}/share</div></div>`;
+    destroyChart('proj');
+    charts.proj=new Chart($('projChart').getContext('2d'),{type:'line',data:{labels:cL,datasets:[{label:'Market Value',data:cV,borderColor:'#16a34a',backgroundColor:'#16a34a20',fill:true,tension:.3},{label:'Total Invested',data:cI,borderColor:'#2563eb',borderDash:[5,5],tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtC(c.parsed.y)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}}}}});
+    destroyChart('discount');
+    charts.discount=new Chart($('discountChart').getContext('2d'),{type:'bar',data:{labels:cL,datasets:[{label:'Period Discount',data:cD,backgroundColor:'#16a34a99',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtC(c.parsed.y)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v.toFixed(0)}}}}});
+    let tbl=`<table><thead><tr><th>Period</th><th class="text-right">Offering FMV</th><th class="text-right">Purchase FMV</th><th class="text-right">Buy Price</th><th class="text-right">Shares</th><th class="text-right">Your Cost</th><th class="text-right">Mkt Value</th><th class="text-right">Discount</th><th class="text-right">Cum Value</th></tr></thead><tbody>`;
+    rows.forEach(r=>{tbl+=`<tr><td>${r.lbl}</td><td class="text-right">${fmtC(r.oFMV)}</td><td class="text-right">${fmtC(r.pFMV)}</td><td class="text-right">${fmtC(r.pp)}</td><td class="text-right">${fmtS(r.sh)}</td><td class="text-right">${fmtC(r.cost)}</td><td class="text-right">${fmtC(r.val)}</td><td class="text-right text-green">${fmtC(r.disc)}</td><td class="text-right" style="font-weight:700;">${fmtC(r.cumV)}</td></tr>`;});
+    $('projTable').innerHTML=tbl+'</tbody></table>';
+}
+
+// ============================== TAX ANALYZER ==============================
+function calcTax(){
+    const inp=getInputs();
+    const is423=inp.is423;
+    $('taxInfoBox').innerHTML = is423
+        ? '<div class="info-box"><strong>Section 423 Tax Rules:</strong> Qualifying Disposition requires holding shares >2 years from Offering Date AND >1 year from Purchase Date. All other dispositions are Disqualifying.</div>'
+        : '<div class="warn-box"><strong>Non-423 Plan:</strong> The discount is treated as ordinary income (compensation) at time of purchase. No qualifying/disqualifying distinction. Subsequent gain/loss is capital.</div>';
+
+    const oFMV=+$('taxOfferingFMV').value, pFMV=+$('taxPurchaseFMV').value;
+    const pp=calcPP(oFMV,pFMV,inp.discountRate,inp.discountBasis);
+    $('taxPurchasePrice').value=fmtC(pp);
+    const shares=+$('taxShares').value, sale=+$('taxSalePrice').value;
+    const totalCost=shares*pp, totalSale=shares*sale, totalGain=totalSale-totalCost;
+    const ordRate=inp.fedTax+inp.stateTax;
+
+    // QUALIFYING
+    const qOrdPS=Math.max(0,Math.min(oFMV*inp.discountRate,sale-pp));
+    const qOrd=qOrdPS*shares;
+    const qCG=Math.max(0,totalSale-totalCost-qOrd);
+    const qCL=sale<pp?(pp-sale)*shares:0;
+    const qOrdTax=qOrd*ordRate, qCGTax=qCG*inp.ltcg;
+    const qTot=qOrdTax+qCGTax, qNet=totalSale-qTot;
+
+    // DISQUALIFYING
+    const dqOrdPS=pFMV-pp;
+    const dqOrd=dqOrdPS*shares;
+    const dqCGraw=totalSale-(shares*pFMV);
+    const dqCG=Math.max(0,dqCGraw), dqCL=dqCGraw<0?Math.abs(dqCGraw):0;
+    const dqOrdTax=dqOrd*ordRate, dqFica=dqOrd*inp.fica, dqCGTax=dqCG*ordRate;
+    const dqTot=dqOrdTax+dqFica+dqCGTax, dqNet=totalSale-dqTot;
+    const savings=dqTot-qTot;
+
+    if(!is423){
+        // Non-423: just one column — ordinary income at purchase, cap gain/loss at sale
+        const n423Ord = (pFMV-pp)*shares;
+        const n423OrdTax = n423Ord*(ordRate);
+        const n423Fica = n423Ord*inp.fica;
+        const n423CG = totalSale - shares*pFMV;
+        const n423CGTax = n423CG>0 ? n423CG*ordRate : 0; // assume short-term for simplicity
+        const n423Tot = n423OrdTax+n423Fica+n423CGTax;
+        const n423Net = totalSale - n423Tot;
+
+        $('taxKPIs').innerHTML=`<div class="kpi"><div class="kpi-label">Total Gain</div><div class="kpi-value">${fmtC(totalGain)}</div></div><div class="kpi amber"><div class="kpi-label">Total Tax</div><div class="kpi-value">${fmtC(n423Tot)}</div></div>`;
+        $('taxCompare').innerHTML=`<div class="compare-header" style="grid-template-columns:2fr 1fr;"><div>Item</div><div>Non-423</div></div>
+            ${[['Gross Sale',fmtC(totalSale)],['Cost Basis',fmtC(totalCost)],['Ordinary Income (at purchase)',fmtC(n423Ord)],['Ordinary Tax','<span class="text-red">'+fmtC(n423OrdTax)+'</span>'],['FICA','<span class="text-red">'+fmtC(n423Fica)+'</span>'],['Capital Gain/Loss',n423CG>=0?'<span class="text-green">'+fmtC(n423CG)+'</span>':'<span class="text-red">'+fmtC(n423CG)+'</span>'],['Cap Gain Tax','<span class="text-red">'+fmtC(n423CGTax)+'</span>'],['<strong>Total Tax</strong>','<strong class="text-red">'+fmtC(n423Tot)+'</strong>'],['<strong>Net Proceeds</strong>','<strong class="text-green">'+fmtC(n423Net)+'</strong>']].map(r=>`<div class="compare-row" style="grid-template-columns:2fr 1fr;"><div class="label">${r[0]}</div><div>${r[1]}</div></div>`).join('')}`;
+        destroyChart('tax');
+        charts.tax=new Chart($('taxChart').getContext('2d'),{type:'bar',data:{labels:['Net Proceeds','Total Tax'],datasets:[{data:[n423Net,n423Tot],backgroundColor:['#16a34a','#dc2626'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+(v/1000).toFixed(1)+'K'}}}}});
+        $('taxDetail').innerHTML=`<p style="font-size:13px;">Non-423 plans: the discount amount (FMV at purchase − purchase price = ${fmtC(pFMV-pp)}/share) is W-2 ordinary income at the time of purchase. Any subsequent gain/loss is capital gain/loss based on holding period.</p>`;
+        return;
+    }
+
+    $('taxKPIs').innerHTML=`<div class="kpi green"><div class="kpi-label">Tax Savings (Qualifying)</div><div class="kpi-value">${fmtC(Math.max(0,savings))}</div><div class="kpi-sub">by holding to qualify</div></div><div class="kpi"><div class="kpi-label">Total Gain</div><div class="kpi-value">${fmtC(totalGain)}</div><div class="kpi-sub">${fmtP(totalGain/totalCost*100)} return</div></div>`;
+
+    const rows=[['Gross Sale Proceeds',fmtC(totalSale),fmtC(totalSale)],['Cost Basis',fmtC(totalCost),fmtC(totalCost)],['Total Gain',totalGain>=0?'<span class="text-green">'+fmtC(totalGain)+'</span>':'<span class="text-red">'+fmtC(totalGain)+'</span>',totalGain>=0?'<span class="text-green">'+fmtC(totalGain)+'</span>':'<span class="text-red">'+fmtC(totalGain)+'</span>'],['Ordinary Income',fmtC(qOrd),fmtC(dqOrd)],['Capital Gain',fmtC(qCG),fmtC(dqCG)],['Capital Loss',qCL>0?'<span class="text-red">('+fmtC(qCL)+')</span>':'—',dqCL>0?'<span class="text-red">('+fmtC(dqCL)+')</span>':'—'],['Ordinary Income Tax','<span class="text-red">'+fmtC(qOrdTax)+'</span>','<span class="text-red">'+fmtC(dqOrdTax)+'</span>'],['FICA Tax','—','<span class="text-red">'+fmtC(dqFica)+'</span>'],['Capital Gains Tax','<span class="text-red">'+fmtC(qCGTax)+'</span> <small>(LTCG)</small>','<span class="text-red">'+fmtC(dqCGTax)+'</span> <small>(STCG)</small>'],['<strong>Total Tax</strong>','<strong class="text-red">'+fmtC(qTot)+'</strong>','<strong class="text-red">'+fmtC(dqTot)+'</strong>'],['<strong>Net After-Tax</strong>','<strong class="text-green">'+fmtC(qNet)+'</strong>','<strong class="text-green">'+fmtC(dqNet)+'</strong>']];
+    let h=`<div class="compare-header"><div>Item</div><div>Qualifying</div><div>Disqualifying</div></div>`;
+    rows.forEach(r=>{h+=`<div class="compare-row"><div class="label">${r[0]}</div><div>${r[1]}</div><div>${r[2]}</div></div>`;});
+    $('taxCompare').innerHTML=h;
+
+    destroyChart('tax');
+    charts.tax=new Chart($('taxChart').getContext('2d'),{type:'bar',data:{labels:['Qualifying','Disqualifying'],datasets:[{label:'Net Proceeds',data:[qNet,dqNet],backgroundColor:['#16a34a','#d97706'],borderRadius:6},{label:'Total Tax',data:[qTot,dqTot],backgroundColor:['#dc262640','#dc262640'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtC(c.parsed.y)}}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{callback:v=>'$'+(v/1000).toFixed(1)+'K'}}}}});
+
+    $('taxDetail').innerHTML=`<h3>Qualifying Disposition</h3><p style="font-size:13px;color:var(--text2);margin-bottom:8px;">Hold >2yr from Offering Date AND >1yr from Purchase Date.</p><p style="font-size:13px;margin-bottom:4px;"><strong>Ordinary Income:</strong> Lesser of (a) ${fmtP(inp.discountRate*100)} × Offering FMV = ${fmtC(oFMV*inp.discountRate)}/sh, or (b) Sale − Purchase Price = ${fmtC(sale-pp)}/sh → <strong>${fmtC(qOrdPS)}/sh</strong></p><p style="font-size:13px;margin-bottom:16px;"><strong>Capital Gain:</strong> Remaining gain at LTCG rate (${(inp.ltcg*100).toFixed(0)}%)</p><hr class="section-divider"><h3>Disqualifying Disposition</h3><p style="font-size:13px;color:var(--text2);margin-bottom:8px;">Sale before meeting both holding periods.</p><p style="font-size:13px;margin-bottom:4px;"><strong>Ordinary Income:</strong> FMV at Purchase (${fmtC(pFMV)}) − Purchase Price (${fmtC(pp)}) = <strong>${fmtC(dqOrdPS)}/sh</strong>. Subject to income tax + FICA.</p><p style="font-size:13px;"><strong>Capital Gain/Loss:</strong> Sale − FMV at Purchase. Short-term rates if held < 1yr.</p>`;
+}
+
+// ============================== SCENARIO ANALYSIS ==============================
+function selectScenario(s){activeScenario=s;document.querySelectorAll('.scenario-card').forEach(c=>c.classList.remove('selected'));document.querySelector(`.scenario-card[data-scenario="${s}"]`).classList.add('selected');runScenarios();}
+
+function runScenarios(){
+    const inp=getInputs();const years=3;const total=Math.round(years*inp.periodsPerYear);
+    const scenarios={bull:{label:'Bull (+15%/yr)',growth:.15,color:'#16a34a'},flat:{label:'Flat (±2%/yr)',growth:.02,color:'#d97706'},bear:{label:'Bear (−10%/yr)',growth:-.10,color:'#dc2626'}};
+    let all={},cL=[];
+    Object.keys(scenarios).forEach(k=>{
+        const sc=scenarios[k];const pg=Math.pow(1+sc.growth,inp.offeringMonths/12)-1;
+        let price=inp.currentPrice,cI=0,cSh=0,cD=0,vals=[],inv=[],rows=[];
+        for(let p=1;p<=total;p++){
+            const oF=price,pF=price*(1+pg);
+            const pp=calcPP(oF,pF,inp.discountRate,inp.discountBasis);
+            const maxL=inp.is423?inp.annualLimit/oF/inp.periodsPerYear:Infinity;
+            const sh=applyShareType(Math.min(inp.contribPerPeriod/pp,maxL),inp.wholeShares);
+            const cost=sh*pp,val=sh*pF;
+            cI+=cost;cSh+=sh;cD+=(val-cost);const cV=cSh*pF;
+            if(k==='bull'){const yr=Math.ceil(p/inp.periodsPerYear);cL.push(`Y${yr}P${p-(yr-1)*inp.periodsPerYear}`);}
+            vals.push(+cV.toFixed(2));inv.push(+cI.toFixed(2));
+            rows.push({p,price:pF,sh,cost,cSh,cV,cD});
+            price=pF;
+        }
+        const last=rows[rows.length-1];
+        all[k]={...sc,vals,inv,rows,totI:cI,totV:last.cV,totD:cD,totRet:((last.cV-cI)/cI*100),annRet:(Math.pow(last.cV/cI,1/years)-1)*100};
+    });
+    const a=all[activeScenario];
+    $('scenarioKPIs').innerHTML=`<div class="kpi"><div class="kpi-label">${a.label} — Invested</div><div class="kpi-value">${fmtC(a.totI)}</div></div><div class="kpi green"><div class="kpi-label">Portfolio Value</div><div class="kpi-value">${fmtC(a.totV)}</div></div><div class="kpi ${a.totRet>=0?'green':'red'}"><div class="kpi-label">Total Return</div><div class="kpi-value">${fmtP(a.totRet)}</div></div><div class="kpi ${a.annRet>=0?'green':'red'}"><div class="kpi-label">Ann. Return</div><div class="kpi-value">${fmtP(a.annRet)}</div></div>`;
+
+    destroyChart('scenario');
+    charts.scenario=new Chart($('scenarioChart').getContext('2d'),{type:'line',data:{labels:cL,datasets:Object.keys(scenarios).map(k=>({label:all[k].label,data:all[k].vals,borderColor:all[k].color,backgroundColor:all[k].color+'15',fill:k===activeScenario,tension:.3,borderWidth:k===activeScenario?3:1.5})).concat([{label:'Invested',data:all.bull.inv,borderColor:'#94a3b8',borderDash:[5,5],tension:.3,borderWidth:1.5}])},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtC(c.parsed.y)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}}}}});
+    destroyChart('scenarioReturn');
+    charts.scenarioReturn=new Chart($('scenarioReturnChart').getContext('2d'),{type:'bar',data:{labels:Object.keys(scenarios).map(k=>all[k].label),datasets:[{label:'Ann. Return',data:Object.keys(scenarios).map(k=>+all[k].annRet.toFixed(2)),backgroundColor:Object.keys(scenarios).map(k=>all[k].color+'AA'),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtP(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
+
+    let tbl=`<table><thead><tr><th>Period</th><th class="text-right">Price</th><th class="text-right">Shares</th><th class="text-right">Cost</th><th class="text-right">Cum Shares</th><th class="text-right">Cum Value</th><th class="text-right">Cum Discount</th></tr></thead><tbody>`;
+    a.rows.forEach(r=>{tbl+=`<tr><td>P${r.p}</td><td class="text-right">${fmtC(r.price)}</td><td class="text-right">${fmtS(r.sh)}</td><td class="text-right">${fmtC(r.cost)}</td><td class="text-right">${fmtS(r.cSh)}</td><td class="text-right" style="font-weight:700;">${fmtC(r.cV)}</td><td class="text-right text-green">${fmtC(r.cD)}</td></tr>`;});
+    $('scenarioTable').innerHTML=tbl+'</tbody></table>';
+}
+
+// ============================== §25K LIMIT ==============================
+function calcLimit(){
+    const inp=getInputs();
+    $('limitInfoBox').innerHTML = inp.is423
+        ? '<div class="warn-box"><strong>IRS §423 Rule:</strong> You may not purchase more than $25,000 in FMV (measured at Offering Date) of stock per calendar year. Max shares per period = $25,000 ÷ (FMV at Offering Date × periods/year). Excess contributions are refunded.</div>'
+        : '<div class="info-box"><strong>Non-423 Plan:</strong> The $25,000 IRS limit does not apply to non-qualified plans. Your company may set its own limits.</div>';
+
+    const fmv=+$('limitFMV').value,periods=+$('limitPeriods').value;
+    if(!inp.is423){
+        $('limitResult').innerHTML='<p style="color:var(--text2);font-size:13px;">No statutory limit for non-423 plans. Check your plan document for company-imposed limits.</p>';
+        $('limitComparison').innerHTML='';
+        destroyChart('limit');
+        return;
+    }
+    const maxSY=inp.annualLimit/fmv, maxSP=maxSY/periods;
+    const pprice=calcPP(fmv,fmv,inp.discountRate,inp.discountBasis);
+    const maxDP=maxSP*pprice, maxDY=maxSY*pprice;
+    const annC=inp.contribPerPeriod*periods;
+    const cpP=inp.contribPerPeriod;
+    const limited=cpP>maxDP;
+    const eff=Math.min(cpP,maxDP), refund=Math.max(0,cpP-maxDP);
+
+    $('limitResult').innerHTML=`<table style="margin-top:16px;"><tbody>
+        <tr><td style="font-weight:600;">FMV at Offering Date</td><td class="text-right">${fmtC(fmv)}</td></tr>
+        <tr><td style="font-weight:600;">§25K ÷ FMV</td><td class="text-right">${fmtS(maxSY)} shares/year</td></tr>
+        <tr><td style="font-weight:600;">Max Shares/Period</td><td class="text-right">${fmtS(maxSP)}</td></tr>
+        <tr><td style="font-weight:600;">Max $/Period</td><td class="text-right">${fmtC(maxDP)}</td></tr>
+        <tr><td style="font-weight:600;">Max $/Year</td><td class="text-right">${fmtC(maxDY)}</td></tr>
+    </tbody></table>`;
+
+    $('limitComparison').innerHTML=`<table><tbody>
+        <tr><td style="font-weight:600;">Annual Contribution</td><td class="text-right">${fmtC(annC)}</td></tr>
+        <tr><td style="font-weight:600;">Per-Period Contribution</td><td class="text-right">${fmtC(cpP)}</td></tr>
+        <tr><td style="font-weight:600;">Max Allowed/Period</td><td class="text-right">${fmtC(maxDP)}</td></tr>
+        <tr><td style="font-weight:600;">Effective</td><td class="text-right" style="font-weight:700;">${fmtC(eff)}</td></tr>
+        <tr><td style="font-weight:600;">Excess Refund</td><td class="text-right ${limited?'text-amber':''}">${fmtC(refund)}</td></tr>
+        <tr style="border-top:2px solid var(--border);"><td style="font-weight:700;">Status</td><td class="text-right ${limited?'text-red':'text-green'}" style="font-weight:700;">${limited?'EXCEEDS — capped':'Within Limit'}</td></tr>
+    </tbody></table>`;
+
+    destroyChart('limit');
+    charts.limit=new Chart($('limitChart').getContext('2d'),{type:'doughnut',data:{labels:limited?['Applied','Refunded']:['Applied','Remaining'],datasets:[{data:limited?[eff,refund]:[eff,maxDP-eff],backgroundColor:limited?['#2563eb','#dc2626']:['#2563eb','#e2e8f0'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>fmtC(c.parsed)}}}}});
+}
+
+// ============================== MASTER ==============================
+function runAllCalculations(){
+    syncContribSlider();
+    const inp=getInputs();
+    computeContrib();
+    $('calcOfferingPrice').value=inp.currentPrice;
+    const g=Math.pow(1+inp.stockGrowth,inp.offeringMonths/12)-1;
+    $('calcPurchasePrice').value=(inp.currentPrice*(1+g)).toFixed(2);
+    $('taxOfferingFMV').value=inp.currentPrice;
+    $('taxPurchaseFMV').value=$('calcPurchasePrice').value;
+    $('limitFMV').value=inp.currentPrice;
+    $('limitPeriods').value=Math.round(12/inp.offeringMonths);
+    calcPurchase();runProjection();calcTax();runScenarios();calcLimit();
+}
+
+function resetDefaults(){
+    $('companyName').value='';$('ticker').value='';$('planType').value='423';
+    $('discountRate').value=15;$('discountBasis').value='lower';
+    $('offeringMonths').value=6;$('purchasePeriodsPerOffering').value='1';
+    $('minContribPct').value=1;$('maxContribPct').value=15;$('contribIncrementPct').value=1;
+    $('minContribDollar').value=10;$('maxContribDollar').value=1000;$('contribIncrementDollar').value=1;
+    $('annualLimit').value=25000;$('shareType').value='fractional';$('resetProvision').value='none';
+    $('salary').value=100000;$('otherComp').value=0;$('payFrequency').value='26';
+    $('contribSlider').value=10;$('contribDollarSlider').value=500;
+    $('currentPrice').value=50;$('stockGrowth').value=8;
+    $('fedTaxRate').value='22';$('stateTaxRate').value=5;$('ficaRate').value=7.65;$('ltcgRate').value='15';
+    contribMode='pct';setContribMode('pct');
+    offeringDates=['2026-01-01','2026-07-01'];renderOfferingDates();
+    togglePlanType();updateHeader();runAllCalculations();
+}
+
+function exportJSON(){
+    const cfg={};
+    document.querySelectorAll('#tab-config input,#tab-config select').forEach(el=>{cfg[el.id]=el.value;});
+    cfg._contribMode=contribMode;cfg._offeringDates=offeringDates;
+    const blob=new Blob([JSON.stringify(cfg,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='espp_config.json';a.click();
+}
+function importJSON(){$('importFile').click();}
+function handleImport(e){
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=function(ev){
+        try{
+            const cfg=JSON.parse(ev.target.result);
+            Object.keys(cfg).forEach(k=>{
+                if(k==='_contribMode'){contribMode=cfg[k];setContribMode(cfg[k]);return;}
+                if(k==='_offeringDates'){offeringDates=cfg[k];renderOfferingDates();return;}
+                const el=$(k);if(el){el.value=cfg[k];}
+            });
+            togglePlanType();updateHeader();runAllCalculations();
+        }catch(err){alert('Invalid JSON file');}
+    };
+    r.readAsText(f);
+}
+
+// ============================== INIT ==============================
+window.addEventListener('DOMContentLoaded',()=>{
+    renderOfferingDates();
+    togglePlanType();
+    syncContribSlider();
+    updateHeader();
+    runAllCalculations();
+});
+</script>
+</body>
+</html>

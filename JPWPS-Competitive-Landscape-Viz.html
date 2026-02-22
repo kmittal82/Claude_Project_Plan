@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equity Management — Competitive Landscape | J.P. Morgan Workplace Solutions</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#154C8A;--navy-dark:#0a1f45;--navy-light:#1a60b0;
+  --warm:#936846;--warm-light:#c49a6c;
+  --cream:#fef8ef;--bg:#f4efe4;--white:#ffffff;
+  --text:#0d1b2e;--text-mid:#4b5563;--text-muted:#9ca3af;
+  --border:rgba(21,76,138,0.11);
+  --green:#166534;--green-bg:rgba(22,101,52,0.07);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#071428 0%,#0d2a5a 40%,#154C8A 100%);position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.hdr-accent{height:4px;background:linear-gradient(90deg,var(--warm) 0%,#e8a96e 35%,var(--navy-light) 70%,var(--warm-light) 100%);}
+.hdr-inner{position:relative;z-index:1;max-width:1380px;margin:0 auto;padding:30px 40px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.hdr-left{}
+.hdr-eyebrow{font-size:9.5px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:5px;}
+.hdr-title{font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.5px;line-height:1.1;}
+.hdr-title em{color:var(--warm-light);font-style:normal;}
+.hdr-sub{font-size:12px;color:rgba(255,255,255,0.45);margin-top:5px;letter-spacing:0.1px;}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.tag{font-size:9.5px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;padding:4px 11px;border-radius:20px;border:1px solid;}
+.tag-navy{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.16);color:rgba(255,255,255,0.7);}
+.tag-gold{background:rgba(147,104,70,0.25);border-color:rgba(196,154,108,0.4);color:var(--warm-light);}
+.hdr-date{font-size:10px;color:rgba(255,255,255,0.28);}
+
+/* BODY */
+.body{max-width:1380px;margin:0 auto;padding:28px 40px 48px;}
+
+/* KPI ROW */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px 18px 16px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default;}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(21,76,138,0.10);}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.bl::after{background:var(--navy);}
+.kpi.gd::after{background:var(--warm);}
+.kpi.gn::after{background:#16a34a;}
+.kpi-icon{font-size:18px;margin-bottom:9px;display:block;}
+.kpi-val{font-size:26px;font-weight:900;letter-spacing:-0.6px;line-height:1;}
+.kpi.bl .kpi-val{color:var(--navy);}
+.kpi.gd .kpi-val{color:var(--warm);}
+.kpi.gn .kpi-val{color:#16a34a;}
+.kpi-lbl{font-size:10.5px;color:var(--text-muted);font-weight:500;margin-top:5px;line-height:1.35;}
+.kpi-src{font-size:9px;color:#c4c9d4;margin-top:3px;font-style:italic;}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin:24px 0 16px;}
+.sec-hdr h2{font-size:14.5px;font-weight:800;color:var(--text);letter-spacing:-0.1px;white-space:nowrap;}
+.sec-pill{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;background:rgba(21,76,138,0.07);color:var(--navy);padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.sec-line{flex:1;height:1px;background:var(--border);}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.full{margin-bottom:18px;}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:22px 22px 16px;transition:box-shadow .2s;}
+.card:hover{box-shadow:0 4px 18px rgba(21,76,138,0.07);}
+.card-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px;}
+.card-sub{font-size:10.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.4;}
+.note{font-size:9.5px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:14px;font-style:italic;line-height:1.5;}
+
+/* HORIZONTAL BAR ROWS */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.bar-lbl{font-size:11px;font-weight:600;width:118px;flex-shrink:0;text-align:right;line-height:1.2;}
+.bar-track{flex:1;background:#f1f2f4;border-radius:6px;overflow:visible;height:28px;position:relative;}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:10.5px;font-weight:700;color:#fff;min-width:28px;transition:width 1.1s cubic-bezier(.22,1,.36,1);white-space:nowrap;}
+.bar-fill.nd{background:transparent;border:1.5px dashed #e5e7eb;color:var(--text-muted);font-style:italic;font-size:10px;padding-left:10px;justify-content:flex-start;}
+/* competitor colors */
+.c-jpwps{background:var(--navy);}
+.c-ms{background:#2d3748;}
+.c-fid{background:#6b7280;}
+.c-schwab{background:#9ca3af;}
+.c-carta{background:var(--warm);}
+.c-ledgy{background:#b8845c;}
+
+/* MARKET SHARE SPECIAL */
+.ms-hero{text-align:center;padding:8px 0 14px;}
+.ms-num{font-size:80px;font-weight:900;color:var(--warm);letter-spacing:-4px;line-height:1;transition:all 0.05s;}
+.ms-lbl{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+.ms-bars{margin-top:18px;}
+.ms-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.ms-bar-lbl{font-size:11px;font-weight:600;width:80px;text-align:right;flex-shrink:0;}
+.ms-track{flex:1;background:#f1f2f4;border-radius:6px;overflow:hidden;height:30px;}
+.ms-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:11.5px;font-weight:800;color:#fff;transition:width 1.3s cubic-bezier(.22,1,.36,1);}
+.ms-fill.others{background:#d1d5db;color:var(--text-mid);justify-content:flex-start;}
+.insight-box{background:rgba(147,104,70,0.06);border:1px solid rgba(147,104,70,0.18);border-radius:8px;padding:10px 13px;margin-top:14px;}
+.insight-lbl{font-size:10px;font-weight:800;color:var(--warm);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;}
+.insight-txt{font-size:11px;color:var(--text-mid);line-height:1.55;}
+
+/* GROWTH CALLOUT ROW */
+.growth-row{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+.growth-box{flex:1;min-width:150px;border-radius:9px;padding:14px 16px;border:1px solid;}
+.growth-box.bl{background:rgba(21,76,138,0.04);border-color:rgba(21,76,138,0.13);}
+.growth-box.gd{background:rgba(147,104,70,0.05);border-color:rgba(147,104,70,0.16);}
+.growth-box.gn{background:rgba(22,101,52,0.05);border-color:rgba(22,101,52,0.14);}
+.growth-box.gy{background:rgba(107,114,128,0.05);border-color:rgba(107,114,128,0.14);}
+.growth-val{font-size:21px;font-weight:900;letter-spacing:-0.5px;}
+.growth-box.bl .growth-val{color:var(--navy);}
+.growth-box.gd .growth-val{color:var(--warm);}
+.growth-box.gn .growth-val{color:#16a34a;}
+.growth-box.gy .growth-val{color:#6b7280;}
+.growth-desc{font-size:10.5px;color:var(--text-muted);margin-top:3px;line-height:1.4;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;justify-content:center;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text-mid);font-weight:500;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.leg-line{width:22px;height:3px;border-radius:2px;flex-shrink:0;}
+.leg-dash{width:22px;height:0;border-top:2px dashed;flex-shrink:0;}
+
+/* FOOTER */
+.ftr{border-top:1px solid var(--border);background:rgba(21,76,138,0.025);padding:16px 40px;display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--text-muted);flex-wrap:wrap;gap:8px;}
+.ftr-brand{font-weight:800;color:var(--warm);letter-spacing:0.3px;}
+.ftr-sources{font-size:9.5px;color:#c4c9d4;}
+
+@media(max-width:960px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr);}
+  .g2{grid-template-columns:1fr;}
+  .body{padding:20px;}
+  .hdr-inner{padding:22px 20px 20px;}
+  .ms-num{font-size:60px;}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-accent"></div>
+  <div class="hdr-inner">
+    <div class="hdr-left">
+      <div class="hdr-eyebrow">J.P. Morgan</div>
+      <div class="hdr-title">Workplace <em>Solutions</em></div>
+      <div class="hdr-sub">Equity Management &amp; Administration — Competitive Landscape · Key Market Metrics</div>
+    </div>
+    <div class="hdr-right">
+      <div class="tags">
+        <span class="tag tag-gold">⚡ Internal Use Only</span>
+        <span class="tag tag-navy">Sales Intelligence</span>
+        <span class="tag tag-navy">February 2026</span>
+      </div>
+      <div class="hdr-date">Sources: Allied Market Research · SkyQuest · BRC · Carta · Eqvista · Contrary Research · Company disclosures</div>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- KPI SUMMARY -->
+  <div class="kpi-grid">
+    <div class="kpi bl">
+      <span class="kpi-icon">🌍</span>
+      <div class="kpi-val">$725M</div>
+      <div class="kpi-lbl">Global equity admin market today</div>
+      <div class="kpi-src">Mid-range estimate, 2024/25</div>
+    </div>
+    <div class="kpi gd">
+      <span class="kpi-icon">📈</span>
+      <div class="kpi-val">13.5%</div>
+      <div class="kpi-lbl">Annual market growth rate (CAGR)</div>
+      <div class="kpi-src">Allied MR · SkyQuest · BRC</div>
+    </div>
+    <div class="kpi gn">
+      <span class="kpi-icon">🎯</span>
+      <div class="kpi-val">$2B+</div>
+      <div class="kpi-lbl">Projected market size by 2030</div>
+      <div class="kpi-src">12–15% CAGR scenario range</div>
+    </div>
+    <div class="kpi bl">
+      <span class="kpi-icon">🤖</span>
+      <div class="kpi-val">&lt;30%</div>
+      <div class="kpi-lbl">Equity admins using AI today</div>
+      <div class="kpi-src">vs 60%+ in broader finance</div>
+    </div>
+    <div class="kpi gd">
+      <span class="kpi-icon">🏢</span>
+      <div class="kpi-val">70K+</div>
+      <div class="kpi-lbl">Companies across all 6 providers</div>
+      <div class="kpi-src">Dominated by Carta (65K+ startups)</div>
+    </div>
+  </div>
+
+  <!-- SCALE: CLIENTS + PARTICIPANTS -->
+  <div class="sec-hdr">
+    <h2>📊 Market Scale</h2>
+    <span class="sec-pill">Corporate Clients · Plan Participants</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="g2">
+
+    <!-- CLIENTS CHART -->
+    <div class="card">
+      <div class="card-title">① Corporate Clients</div>
+      <div class="card-sub">Companies enrolled on each platform — log scale reveals the magnitude of Carta's startup dominance</div>
+      <canvas id="clientChart" height="230"></canvas>
+      <div class="note">* Schwab client count not publicly disclosed. Ledgy and Fidelity are estimates. Carta serves primarily private/startup cos — a different buyer than JPWPS enterprise public-company clients.</div>
+    </div>
+
+    <!-- PARTICIPANTS CUSTOM BARS -->
+    <div class="card">
+      <div class="card-title">② Plan Participants</div>
+      <div class="card-sub">Employees actively enrolled across equity plans — Schwab &amp; Ledgy figures not publicly disclosed</div>
+
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:#2d3748;">Morgan Stanley</div>
+        <div class="bar-track"><div class="bar-fill c-ms" style="width:0" data-w="100">4.6M+</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:#6b7280;">Fidelity SPS</div>
+        <div class="bar-track"><div class="bar-fill c-fid" style="width:0" data-w="43">2.0M+</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:var(--warm);">Carta</div>
+        <div class="bar-track"><div class="bar-fill c-carta" style="width:0" data-w="37">1.7M+</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:var(--navy);font-weight:800;">J.P. Morgan WPS</div>
+        <div class="bar-track"><div class="bar-fill c-jpwps" style="width:0" data-w="17">0.8M+</div></div>
+      </div>
+      <div class="bar-row" style="opacity:.5;">
+        <div class="bar-lbl" style="color:#9ca3af;">Schwab SPS</div>
+        <div class="bar-track"><div class="bar-fill nd" style="width:100%">Not publicly disclosed</div></div>
+      </div>
+      <div class="bar-row" style="opacity:.5;">
+        <div class="bar-lbl" style="color:#9ca3af;">Ledgy</div>
+        <div class="bar-track"><div class="bar-fill nd" style="width:100%">Not publicly disclosed</div></div>
+      </div>
+
+      <div class="note">* MS total includes EEO + Shareworks combined. Carta counts are private company security holders, not traditional equity plan participants.</div>
+    </div>
+  </div>
+
+  <!-- REACH + MARKET SHARE -->
+  <div class="sec-hdr">
+    <h2>🌐 Geographic Reach &amp; Market Share</h2>
+    <span class="sec-pill">Countries Supported · Cap Table Share</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="g2">
+
+    <!-- GEO BARS -->
+    <div class="card">
+      <div class="card-title">③ Geographic Reach</div>
+      <div class="card-sub">Countries or jurisdictions where each provider actively supports equity plan administration and tax</div>
+
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:#2d3748;">Morgan Stanley</div>
+        <div class="bar-track"><div class="bar-fill c-ms" style="width:0" data-w="100">~90 (est.)</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:#b8845c;">Ledgy</div>
+        <div class="bar-track"><div class="bar-fill c-ledgy" style="width:0" data-w="78">70+</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:var(--navy);font-weight:800;">J.P. Morgan WPS</div>
+        <div class="bar-track"><div class="bar-fill c-jpwps" style="width:0" data-w="56">50+</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:#6b7280;">Fidelity SPS</div>
+        <div class="bar-track"><div class="bar-fill c-fid" style="width:0" data-w="22">~20</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:var(--warm);">Carta</div>
+        <div class="bar-track"><div class="bar-fill c-carta" style="width:0" data-w="11">~10</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl" style="color:#9ca3af;">Schwab SPS</div>
+        <div class="bar-track"><div class="bar-fill c-schwab" style="width:0" data-w="6">~5</div></div>
+      </div>
+
+      <div class="note">* Fidelity, Carta, and Schwab are estimates from public disclosures and analyst reports. Ledgy jurisdiction count confirmed via their website. Morgan Stanley estimate based on Shareworks + EEO global footprint.</div>
+    </div>
+
+    <!-- MARKET SHARE -->
+    <div class="card">
+      <div class="card-title">④ Startup Cap Table Market Share</div>
+      <div class="card-sub">Carta's near-monopoly in the private/startup segment — all others combined hold just 5%</div>
+
+      <div class="ms-hero">
+        <div class="ms-num" id="cPct">0%</div>
+        <div class="ms-lbl">Carta's startup cap table market share</div>
+      </div>
+
+      <div class="ms-bars">
+        <div class="ms-bar-row">
+          <div class="ms-bar-lbl" style="color:var(--warm);">Carta</div>
+          <div class="ms-track"><div class="ms-fill c-carta" id="cBar" style="width:0%">95%</div></div>
+        </div>
+        <div class="ms-bar-row">
+          <div class="ms-bar-lbl" style="color:#9ca3af;">All Others</div>
+          <div class="ms-track"><div class="ms-fill others" id="oBar" style="width:0%">5%</div></div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <div class="insight-lbl">⚠️ Sales Implication</div>
+        <div class="insight-txt">Carta dominates <b>startup cap tables</b> — but this is a different buyer than JPWPS's enterprise market. Carta rarely competes for Fortune 500 public company equity admin RFPs where JPWPS wins.</div>
+      </div>
+
+      <div class="note">* Sources: Eqvista State of Cap Table Industry 2024 · Contrary Research 2023. Applies to private/startup segment only. No public company equity admin market share data publicly available across providers.</div>
+    </div>
+  </div>
+
+  <!-- MARKET GROWTH -->
+  <div class="sec-hdr">
+    <h2>📈 Market Opportunity</h2>
+    <span class="sec-pill">2022–2030 Growth Projection</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="full">
+    <div class="card">
+      <div class="card-title">⑤ Global Equity Administration Software — Market Growth Projection (2022–2030)</div>
+      <div class="card-sub">Central estimate at 13.5% CAGR with 12–15% confidence range. AI adoption and global equity plan expansion are primary growth drivers.</div>
+
+      <div class="growth-row">
+        <div class="growth-box bl"><div class="growth-val">$600–850M</div><div class="growth-desc">Market size today (2024/25 range estimate)</div></div>
+        <div class="growth-box gd"><div class="growth-val">12–15%</div><div class="growth-desc">Projected annual growth rate (CAGR)</div></div>
+        <div class="growth-box gn"><div class="growth-val">$1.5–2.5B</div><div class="growth-desc">Market size by 2030 (full scenario range)</div></div>
+        <div class="growth-box gy"><div class="growth-val">&lt;30%</div><div class="growth-desc">Equity admins using AI — first-mover gap vs 60%+ in broader finance</div></div>
+      </div>
+
+      <canvas id="growthChart" height="110"></canvas>
+
+      <div class="legend">
+        <div class="leg-item"><div class="leg-line" style="background:var(--navy)"></div>Central Estimate (13.5% CAGR)</div>
+        <div class="leg-item"><div class="leg-dash" style="border-color:rgba(21,76,138,0.35)"></div>12–15% Range</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--warm)"></div>Today — Feb 2026</div>
+      </div>
+
+      <div class="note">Sources: Allied Market Research · SkyQuest · Business Research Co. Central estimate: 13.5% CAGR applied to ~$650M 2022 base. Range: 12% low / 15% high scenario.</div>
+    </div>
+  </div>
+
+</div><!-- /body -->
+
+<div class="ftr">
+  <div><span class="ftr-brand">J.P. Morgan Workplace Solutions</span> · Equity Management &amp; Administration Competitive Intelligence</div>
+  <div class="ftr-sources">Allied Market Research · SkyQuest · BRC · Eqvista · Contrary Research · Company public disclosures · February 2026</div>
+</div>
+
+<script>
+// ── Animate bars on intersection ──────────────────────────────
+function animateAll() {
+  document.querySelectorAll('.bar-fill[data-w]').forEach((el, i) => {
+    setTimeout(() => { el.style.width = el.dataset.w + '%'; }, 200 + i * 90);
+  });
+
+  // Market share count-up
+  setTimeout(() => {
+    document.getElementById('cBar').style.width = '95%';
+    document.getElementById('oBar').style.width = '5%';
+    let n = 0;
+    const el = document.getElementById('cPct');
+    const t = setInterval(() => {
+      n++; el.textContent = n + '%';
+      if (n >= 95) clearInterval(t);
+    }, 13);
+  }, 400);
+}
+window.addEventListener('load', animateAll);
+
+// ── Chart 1: Clients (log horizontal bar) ─────────────────────
+const clientCtx = document.getElementById('clientChart').getContext('2d');
+new Chart(clientCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Carta','Morgan Stanley','J.P. Morgan WPS','Ledgy','Fidelity SPS'],
+    datasets:[{
+      data: [65000, 3400, 650, 500, 325],
+      backgroundColor: ['rgba(147,104,70,0.82)','rgba(45,55,72,0.82)','rgba(21,76,138,0.88)','rgba(184,132,92,0.78)','rgba(107,114,128,0.72)'],
+      borderColor:      ['#936846','#2d3748','#154C8A','#b8845c','#6b7280'],
+      borderWidth: 1.5,
+      borderRadius: 7,
+      borderSkipped: false,
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    responsive:true,
+    animation:{duration:1100,easing:'easeOutQuart'},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'rgba(13,27,46,0.92)',
+        titleFont:{family:'Inter',size:12,weight:'700'},
+        bodyFont:{family:'Inter',size:11},
+        padding:11,
+        callbacks:{
+          label:(ctx)=>{
+            const v=ctx.parsed.x;
+            return ' '+(v>=1000?(v/1000).toFixed(v>=10000?0:1)+'K':v)+' companies';
+          }
+        }
+      },
+    },
+    scales:{
+      x:{
+        type:'logarithmic', min:100, max:200000,
+        grid:{color:'rgba(0,0,0,0.04)'},
+        ticks:{
+          font:{size:10,family:'Inter'},color:'#9ca3af',
+          callback:(v)=>{
+            if([100,1000,10000,100000].includes(v)) return v>=1000?(v>=100000?'100K':v/1000+'K'):v;
+            return '';
+          }
+        },
+        border:{display:false},
+      },
+      y:{
+        grid:{display:false},
+        border:{display:false},
+        ticks:{
+          font:{size:11.5,family:'Inter',weight:'600'},
+          color:(ctx)=>{
+            const l=ctx.tick.label;
+            if(l==='J.P. Morgan WPS') return '#154C8A';
+            if(l==='Carta') return '#936846';
+            return '#374151';
+          }
+        }
+      }
+    }
+  }
+});
+
+// ── Chart 2: Growth ───────────────────────────────────────────
+const yrs=[2022,2023,2024,2025,2026,2027,2028,2029,2030];
+const mid=yrs.map((_,i)=>Math.round(650*Math.pow(1.135,i)));
+const lo =yrs.map((_,i)=>Math.round(550*Math.pow(1.12,i)));
+const hi =yrs.map((_,i)=>Math.round(800*Math.pow(1.15,i)));
+
+const gCtx=document.getElementById('growthChart').getContext('2d');
+const areaGrad=gCtx.createLinearGradient(0,0,0,280);
+areaGrad.addColorStop(0,'rgba(21,76,138,0.14)');
+areaGrad.addColorStop(1,'rgba(21,76,138,0.01)');
+
+new Chart(gCtx,{
+  type:'line',
+  data:{
+    labels:yrs,
+    datasets:[
+      {label:'High',data:hi,borderColor:'rgba(21,76,138,0.15)',borderDash:[5,5],pointRadius:0,tension:.38,fill:'+1',backgroundColor:'rgba(21,76,138,0.06)',borderWidth:1},
+      {label:'Low', data:lo,borderColor:'rgba(21,76,138,0.15)',borderDash:[5,5],pointRadius:0,tension:.38,fill:false,borderWidth:1},
+      {label:'Central (13.5% CAGR)',data:mid,
+        borderColor:'#154C8A',borderWidth:3,tension:.38,
+        backgroundColor:areaGrad,fill:'origin',
+        pointRadius:(ctx)=>ctx.dataIndex===4?8:4,
+        pointBackgroundColor:(ctx)=>ctx.dataIndex===4?'#936846':'#154C8A',
+        pointBorderColor:'#fff',pointBorderWidth:2.5,
+        order:1,
+      },
+    ]
+  },
+  options:{
+    responsive:true,
+    animation:{duration:1400,easing:'easeOutQuart'},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'rgba(13,27,46,0.92)',
+        titleFont:{family:'Inter',size:12,weight:'700'},
+        bodyFont:{family:'Inter',size:11},
+        padding:12,
+        callbacks:{
+          title:(items)=>'Year: '+items[0].label,
+          label:(ctx)=>{
+            const v=ctx.parsed.y;
+            const lab=ctx.dataset.label;
+            if(lab==='Low'||lab==='High') return null;
+            return ' '+lab+': $'+(v>=1000?(v/1000).toFixed(1)+'B':v+'M');
+          },
+          afterBody:(items)=>{
+            const i=items[0].dataIndex;
+            return [`Range: $${(lo[i]/1000).toFixed(1)}B – $${(hi[i]/1000).toFixed(1)}B`];
+          }
+        }
+      },
+    },
+    scales:{
+      x:{
+        grid:{color:'rgba(0,0,0,0.04)'},
+        border:{display:false},
+        ticks:{font:{size:11,family:'Inter'},color:'#6b7280'},
+      },
+      y:{
+        grid:{color:'rgba(0,0,0,0.04)'},
+        border:{display:false},
+        ticks:{
+          font:{size:10,family:'Inter'},color:'#9ca3af',
+          callback:(v)=>v>=1000?'$'+(v/1000).toFixed(1)+'B':'$'+v+'M',
+        }
+      }
+    }
+  }
+});
+
+// Draw "TODAY" annotation manually after render
+document.getElementById('growthChart').addEventListener('animationend',()=>{},true);
+</script>
+</body>
+</html>

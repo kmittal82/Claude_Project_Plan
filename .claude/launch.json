@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "equity-admin-bot",
+      "runtimeExecutable": "streamlit",
+      "runtimeArgs": ["run", "equity-admin-bot/app.py"],
+      "port": 8501
+    },
+    {
+      "name": "espp-modeler",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8080", "--directory", "espp-modeler-site"],
+      "port": 8080
+    }
+  ]
+}
