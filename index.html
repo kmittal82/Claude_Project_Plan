@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSU Vesting Tracker — JPMC Workplace Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.08);
+    --border-mid: rgba(0,0,0,0.13);
+    --text: #1a1918;
+    --text-2: #6b6a64;
+    --text-3: #9e9d96;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --blue-mid: #378ADD;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --teal-mid: #1D9E75;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border-mid);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--text);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { display: block; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .grant-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-2);
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border-mid);
+  }
+
+  .price-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-2);
+  }
+
+  .price-control input[type=range] {
+    width: 80px;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-mid);
+    outline: none;
+  }
+
+  .price-control input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+  }
+
+  .price-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 44px;
+  }
+
+  main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 2rem;
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    header { padding: 0 1rem; }
+    main { padding: 1.5rem 1rem 3rem; }
+  }
+
+  .kpi {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .kpi:nth-child(1) { animation-delay: 0.05s; }
+  .kpi:nth-child(2) { animation-delay: 0.1s; }
+  .kpi:nth-child(3) { animation-delay: 0.15s; }
+  .kpi:nth-child(4) { animation-delay: 0.2s; }
+
+  .kpi-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .kpi-val {
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .kpi-val.muted { color: var(--text-3); }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-2);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .card:nth-of-type(2) { animation-delay: 0.1s; }
+  .card:nth-of-type(3) { animation-delay: 0.15s; }
+  .card:nth-of-type(4) { animation-delay: 0.2s; }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-2);
+  }
+
+  .legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .tl-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+
+  .tl-track-bg {
+    height: 5px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin-bottom: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tl-track-fill {
+    position: absolute;
+    left: 0; top: 0;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--blue-mid);
+    width: 0;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+  }
+
+  .tl-note {
+    font-size: 11px;
+    color: var(--text-2);
+    margin-bottom: 1.25rem;
+  }
+
+  .tl-empty {
+    font-size: 11px;
+    color: var(--text-3);
+    font-style: italic;
+    margin-bottom: 1.25rem;
+  }
+
+  .tranches { display: flex; flex-direction: column; gap: 5px; }
+
+  .tranche {
+    display: grid;
+    grid-template-columns: 72px 1fr 34px 60px 74px;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    transition: background 0.15s;
+    cursor: default;
+  }
+
+  .tranche:hover { background: var(--surface2); }
+
+  .t-date { font-size: 11px; color: var(--text-2); white-space: nowrap; }
+
+  .t-bar-wrap {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .t-bar {
+    height: 100%;
+    border-radius: 2px;
+    width: 0;
+    transition: width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+
+  .t-pct { font-size: 10px; color: var(--text-3); text-align: right; font-family: 'DM Mono', monospace; }
+  .t-shares { font-size: 12px; font-weight: 500; text-align: right; font-family: 'DM Mono', monospace; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .b-vested { background: var(--teal-light); color: var(--teal); }
+  .b-soon { background: var(--blue-light); color: var(--blue); }
+  .b-upcoming { background: var(--surface2); color: var(--text-2); border: 0.5px solid var(--border-mid); }
+
+  .empty-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 140px;
+    color: var(--text-3);
+    font-size: 12px;
+    border: 0.5px dashed var(--border-mid);
+    border-radius: var(--radius);
+    gap: 8px;
+  }
+
+  .chart-wrap { position: relative; width: 100%; height: 200px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+
+  th {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0 0 10px;
+    text-align: left;
+    border-bottom: 0.5px solid var(--border-mid);
+  }
+
+  th:not(:first-child) { text-align: right; }
+
+  td {
+    padding: 10px 0;
+    color: var(--text);
+    border-bottom: 0.5px solid var(--border);
+    vertical-align: middle;
+  }
+
+  td:not(:first-child) { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+
+  .t-name { font-weight: 500; font-family: 'DM Mono', monospace; font-size: 11px; }
+  .t-days { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-3);
+    padding: 2rem 0 1rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="8" width="3" height="6" rx="1" fill="white" opacity="0.5"/>
+        <rect x="6.5" y="5" width="3" height="9" rx="1" fill="white" opacity="0.75"/>
+        <rect x="11" y="2" width="3" height="12" rx="1" fill="white"/>
+      </svg>
+    </div>
+    RSU Vesting Tracker
+  </div>
+  <div class="header-right">
+    <span class="grant-pill">JPMC-2022-RSU-0041</span>
+    <div class="price-control">
+      <span>Price</span>
+      <input type="range" min="150" max="400" value="237" step="1" id="price-slider">
+      <span class="price-val" id="price-disp">$237</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Equity vesting dashboard</div>
+  <div class="page-sub">4-year RSU grant · Cliff + quarterly release schedule</div>
+
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Overall progress</span>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--teal-mid)"></span>Vested</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--blue-mid)"></span>Next up</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ccc"></span>Future</span>
+      </div>
+    </div>
+    <div class="tl-label-row"><span id="tl-left">Grant date</span><span id="tl-right">Full vest</span></div>
+    <div class="tl-track-bg"><div class="tl-track-fill" id="overall-fill"></div></div>
+    <div id="tl-note-wrap"></div>
+    <div class="tranches" id="tranche-rows"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Cumulative value released</span>
+    </div>
+    <div id="chart-area"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Full vesting schedule</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:48px">ID</th>
+          <th>Vest date</th>
+          <th>Shares</th>
+          <th>Est. value</th>
+          <th style="width:82px">Status</th>
+        </tr>
+      </thead>
+      <tbody id="sched-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>J.P. Morgan Workplace Solutions · For illustrative purposes only</footer>
+
+<script>
+const TODAY = new Date('2026-03-17');
+let PRICE = 237;
+
+const tranches = [
+  {id:'T1',date:'2023-03-15',shares:1000},
+  {id:'T2',date:'2023-09-15',shares:700},
+  {id:'T3',date:'2024-03-15',shares:700},
+  {id:'T4',date:'2024-09-15',shares:600},
+  {id:'T5',date:'2025-03-15',shares:300},
+  {id:'T6',date:'2025-09-15',shares:100},
+  {id:'T7',date:'2026-04-01',shares:600},
+  {id:'T8',date:'2027-03-15',shares:500},
+  {id:'T9',date:'2027-09-15',shares:500},
+];
+
+function st(d){const v=new Date(d);if(v<TODAY)return'vested';const days=(v-TODAY)/86400000;return days<=75?'soon':'upcoming';}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtMoney(n){return'$'+Math.round(n).toLocaleString();}
+function daysTo(d){return Math.ceil((new Date(d)-TODAY)/86400000);}
+
+const total=tranches.reduce((s,t)=>s+t.shares,0);
+const vestedShares=tranches.filter(t=>st(t.date)==='vested').reduce((s,t)=>s+t.shares,0);
+const nextT=tranches.find(t=>st(t.date)!=='vested');
+const hasVested=vestedShares>0;
+
+function pct(t){const s=st(t.date);if(s==='vested')return 100;if(s==='soon'){const d=daysTo(t.date);return Math.max(0,Math.round((75-d)/75*100));}return 0;}
+
+function buildKPIs(){
+  const row=document.getElementById('kpi-row');
+  const cards=[
+    {label:'Vested shares',val:hasVested?vestedShares.toLocaleString():'0',sub:hasVested?fmtMoney(vestedShares*PRICE)+' est.':'No shares vested yet',muted:!hasVested},
+    {label:'Unvested shares',val:(total-vestedShares).toLocaleString(),sub:fmtMoney((total-vestedShares)*PRICE)+' est.',muted:false},
+    {label:'Next vest',val:nextT?nextT.shares.toLocaleString()+' shs':'—',sub:nextT?'In '+daysTo(nextT.date)+' days':'Fully vested',muted:!nextT},
+    {label:'Grant total',val:total.toLocaleString(),sub:fmtMoney(total*PRICE)+' est.',muted:false},
+  ];
+  row.innerHTML=cards.map(c=>`<div class="kpi"><div class="kpi-label">${c.label}</div><div class="kpi-val${c.muted?' muted':''}">${c.val}</div><div class="kpi-sub">${c.sub}</div></div>`).join('');
+}
+
+function buildProgress(){
+  const op=hasVested?Math.round(vestedShares/total*100):0;
+  const fill=document.getElementById('overall-fill');
+  const wrap=document.getElementById('tl-note-wrap');
+  if(!hasVested){
+    fill.style.width='0%';
+    wrap.innerHTML=`<div class="tl-empty">No tranches vested yet — first vest ${fmtDate(nextT.date)}</div>`;
+  } else {
+    setTimeout(()=>{fill.style.width=op+'%';},80);
+    wrap.innerHTML=`<div class="tl-note">${op}% vested — ${vestedShares.toLocaleString()} of ${total.toLocaleString()} shares</div>`;
+  }
+}
+
+function buildTranches(){
+  const container=document.getElementById('tranche-rows');
+  container.innerHTML='';
+  tranches.forEach(t=>{
+    const s=st(t.date);const p=pct(t);
+    const barColor=s==='vested'?'var(--teal-mid)':s==='soon'?'var(--blue-mid)':'#ccc';
+    const badgeCls=s==='vested'?'b-vested':s==='soon'?'b-soon':'b-upcoming';
+    const badgeTxt=s==='vested'?'Vested':s==='soon'?'Soon':'Upcoming';
+    const row=document.createElement('div');
+    row.className='tranche';
+    row.innerHTML=`<span class="t-date">${new Date(t.date).toLocaleDateString('en-US',{month:'short',year:'numeric'})}</span><div class="t-bar-wrap"><div class="t-bar" data-pct="${p}" style="background:${barColor}"></div></div><span class="t-pct">${p>0?p+'%':'—'}</span><span class="t-shares">${t.shares.toLocaleString()}</span><span class="badge ${badgeCls}">${badgeTxt}</span>`;
+    container.appendChild(row);
+  });
+  setTimeout(()=>{document.querySelectorAll('.t-bar').forEach(b=>{b.style.width=b.dataset.pct+'%';});},150);
+}
+
+let chart;
+function buildChart(){
+  const area=document.getElementById('chart-area');
+  if(!hasVested){
+    area.innerHTML=`<div class="empty-chart"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 17l4-8 4 4 4-6 4 3"/><path d="M3 21h18"/></svg>Chart will appear once the first tranche vests</div>`;
+    return;
+  }
+  area.innerHTML='<div class="chart-wrap"><canvas id="vestChart"></canvas></div>';
+  if(chart)chart.destroy();
+  const vt=tranches.filter(t=>st(t.date)==='vested');
+  let cum=0;
+  const labels=vt.map(t=>new Date(t.date).toLocaleDateString('en-US',{month:'short',year:'2-digit'}));
+  const data=vt.map(t=>{cum+=t.shares*PRICE;return Math.round(cum);});
+  chart=new Chart(document.getElementById('vestChart'),{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:'#1D9E75',borderRadius:5,borderSkipped:false,barThickness:26}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.raw.toLocaleString()+' cumulative'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10,family:"'DM Mono', monospace"},color:'#9e9d96',maxRotation:0,autoSkip:false}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10,family:"'DM Mono', monospace"},color:'#9e9d96',callback:v=>'$'+Math.round(v/1000)+'k'},border:{display:false}}
+      }
+    }
+  });
+}
+
+function buildTable(){
+  const tbody=document.getElementById('sched-body');
+  tbody.innerHTML='';
+  tranches.forEach(t=>{
+    const s=st(t.date);
+    const badgeCls=s==='vested'?'b-vested':s==='soon'?'b-soon':'b-upcoming';
+    const badgeTxt=s==='vested'?'Vested':s==='soon'?'Vesting soon':'Upcoming';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="t-name">${t.id}</td><td>${fmtDate(t.date)}${s==='soon'?'<div class="t-days">'+daysTo(t.date)+' days away</div>':''}</td><td>${t.shares.toLocaleString()}</td><td>${fmtMoney(t.shares*PRICE)}</td><td><span class="badge ${badgeCls}">${badgeTxt}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderAll(){buildKPIs();buildProgress();buildTranches();buildChart();buildTable();}
+renderAll();
+
+document.getElementById('price-slider').addEventListener('input',function(){
+  PRICE=+this.value;
+  document.getElementById('price-disp').textContent='$'+PRICE;
+  buildKPIs();buildTable();buildChart();
+});
+</script>
+</body>
+</html>
