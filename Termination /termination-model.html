@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Participant Termination Model</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;padding:20px;font-size:14px}
+h1{font-size:20px;font-weight:600;margin-bottom:4px}
+.sub{font-size:13px;color:#666;margin-bottom:20px}
+.pc{background:#f0efe8;border-radius:12px;padding:16px;margin-bottom:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pf{display:flex;flex-direction:column;gap:5px}
+.pf label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em}
+.pf input,.pf select{font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;width:100%}
+.rbtn{display:block;width:100%;padding:11px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:22px}
+.rbtn:hover{background:#0C447C}
+.krow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:#f0efe8;border-radius:8px;padding:12px 14px}
+.kl{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.kv{font-size:20px;font-weight:600}
+.ks{font-size:11px;color:#888;margin-top:3px}
+.blue{color:#185FA5}.red{color:#8B2020}.amb{color:#7A4A0A}.grn{color:#2D5A0E}
+.tabs{display:flex;border-bottom:1px solid #e0e0e0;margin-bottom:20px;gap:0}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:#888;border-bottom:3px solid transparent}
+.tab.on{color:#185FA5;border-bottom:3px solid #185FA5;font-weight:500}
+.pane{display:none}.pane.on{display:block}
+.gg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.gc{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:14px}
+.gh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.gn{font-size:13px;font-weight:600}.gt{font-size:11px;color:#888;margin-top:2px}
+.bx{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-b{background:#dbeeff;color:#185FA5}.b-r{background:#ffe0e0;color:#8B2020}.b-g{background:#d6f0c8;color:#2D5A0E}.b-a{background:#feebc8;color:#7A4A0A}.b-gr{background:#ece9e0;color:#555}
+.vbb{background:#ece9e0;border-radius:3px;height:7px;width:100%;overflow:hidden;margin:8px 0 4px}
+.vbf{height:7px;border-radius:3px}
+.vl{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:8px}
+.dr{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #f0f0f0}
+.dr:last-child{border-bottom:none}
+.dr span:first-child{color:#888}
+.neg{color:#8B2020;font-weight:600}.pos{color:#185FA5;font-weight:600}.bold{font-weight:600}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:14px}
+.ct{font-size:13px;font-weight:600;margin-bottom:10px}
+.cw{position:relative;width:100%}
+.lg{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:11px;color:#888}
+.lg span{display:flex;align-items:center;gap:4px}
+.ld{width:9px;height:9px;border-radius:2px}
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:14px;padding-bottom:20px}
+.step:last-child{padding-bottom:0}
+.sl{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:32px}
+.sn{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.sline{flex:1;width:1.5px;background:#ddd;margin-top:4px;min-height:16px}
+.step:last-child .sline{display:none}
+.sb{flex:1;padding-top:4px}
+.stit{font-size:13px;font-weight:600;margin-bottom:5px}
+.sdesc{font-size:12px;color:#666;margin-bottom:8px;line-height:1.65}
+.sdet{background:#f8f7f4;border-radius:8px;padding:10px 12px;font-size:12px}
+.sr{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eeede8}
+.sr:last-child{border-bottom:none}
+.sr span:first-child{color:#888}
+.sr span:last-child{font-weight:500}
+.tl{border-left:2px solid #ddd;margin-left:6px;padding-left:16px}
+.ti{position:relative;margin-bottom:16px}
+.td2{position:absolute;left:-23px;top:3px;width:10px;height:10px;border-radius:50%;border:2px solid #f5f5f3}
+.tdate{font-size:11px;color:#888;margin-bottom:2px}
+.ttxt{font-size:12px}
+.ttxt.neg{color:#8B2020}.ttxt.pos{color:#185FA5}.ttxt.amb{color:#7A4A0A}
+.hid{display:none}
+</style>
+</head>
+<body>
+<h1>Participant Termination Model</h1>
+<p class="sub">RSU · RSA · Options · ESPP — full impact with step-by-step walkthrough</p>
+
+<div class="pc">
+  <div class="pf"><label>Participant name</label><input id="pName" value="Sarah Mitchell"></div>
+  <div class="pf"><label>Employee ID</label><input id="pId" value="EMP-10482"></div>
+  <div class="pf"><label>Hire date</label><input type="date" id="hDate" value="2021-03-15"></div>
+  <div class="pf"><label>Termination date</label><input type="date" id="tDate" value="2025-06-30"></div>
+  <div class="pf"><label>Termination type</label>
+    <select id="tType">
+      <option value="voluntary">Voluntary resignation</option>
+      <option value="involuntary">Involuntary (without cause)</option>
+      <option value="cause">Involuntary (with cause)</option>
+      <option value="retirement">Retirement</option>
+      <option value="death">Death / Disability</option>
+    </select>
+  </div>
+  <div class="pf"><label>Stock price on term date ($)</label><input type="number" id="sPrice" value="42.50" step="0.5"></div>
+</div>
+<button class="rbtn" onclick="go()">Run termination model →</button>
+
+<div id="res" class="hid">
+  <div class="krow">
+    <div class="kpi"><div class="kl">Vested shares</div><div class="kv blue" id="kv">—</div><div class="ks">Participant retains</div></div>
+    <div class="kpi"><div class="kl">Forfeited shares</div><div class="kv red" id="kf">—</div><div class="ks">Unvested at termination</div></div>
+    <div class="kpi"><div class="kl">Forfeiture value</div><div class="kv amb" id="kval">—</div><div class="ks">At termination price</div></div>
+    <div class="kpi"><div class="kl">Grants affected</div><div class="kv" id="kg">—</div><div class="ks">Across all plans</div></div>
+    <div class="kpi"><div class="kl">Exercise window</div><div class="kv grn" id="kw">—</div><div class="ks" id="kws">Vested options</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" onclick="swt('summary',this)">Summary &amp; Charts</button>
+    <button class="tab" onclick="swt('walk',this)">Step-by-step walkthrough</button>
+    <button class="tab" onclick="swt('tl',this)">Impact timeline</button>
+  </div>
+
+  <div id="pane-summary" class="pane on">
+    <div class="gg" id="gGrid"></div>
+    <div class="tc">
+      <div class="card"><div class="ct">Vested vs forfeited by grant</div><div class="cw" style="height:200px"><canvas id="cSplit"></canvas></div><div class="lg"><span><span class="ld" style="background:#185FA5"></span>Vested</span><span><span class="ld" style="background:#c0392b"></span>Forfeited</span></div></div>
+      <div class="card"><div class="ct">Forfeited shares by grant type</div><div class="cw" style="height:200px"><canvas id="cType"></canvas></div></div>
+    </div>
+    <div class="tc">
+      <div class="card"><div class="ct">Share issuance impact</div><div id="issDet"></div></div>
+      <div class="card"><div class="ct">Post-termination exercise windows</div><div id="exDet"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px"><div class="ct">Plan-level forfeiture rates (benchmark)</div><div class="cw" style="height:150px"><canvas id="cPlan"></canvas></div></div>
+  </div>
+
+  <div id="pane-walk" class="pane">
+    <div class="steps" id="stepsCont"></div>
+  </div>
+
+  <div id="pane-tl" class="pane">
+    <div class="tl" id="tlCont"></div>
+  </div>
+</div>
+
+<script>
+const GRANTS=[
+  {id:'G-001',type:'RSU',plan:'2021 Equity Plan',grantDate:'2021-03-15',grantShares:4000,vestSchedule:[{date:'2022-03-15',shares:1000},{date:'2023-03-15',shares:1000},{date:'2024-03-15',shares:1000},{date:'2025-03-15',shares:1000}]},
+  {id:'G-002',type:'Options',plan:'2021 Equity Plan',grantDate:'2021-06-01',grantShares:6000,strikePrice:18.00,vestSchedule:[{date:'2022-06-01',shares:1500},{date:'2023-06-01',shares:1500},{date:'2024-06-01',shares:1500},{date:'2025-06-01',shares:1500}]},
+  {id:'G-003',type:'RSA',plan:'2023 Perf. Plan',grantDate:'2023-01-10',grantShares:2000,vestSchedule:[{date:'2024-01-10',shares:500},{date:'2025-01-10',shares:500},{date:'2026-01-10',shares:500},{date:'2027-01-10',shares:500}]},
+  {id:'G-004',type:'ESPP',plan:'2022 ESPP',grantDate:'2024-01-01',grantShares:800,discount:15,vestSchedule:[{date:'2024-06-30',shares:400},{date:'2025-01-01',shares:400}]}
+];
+const WIN={voluntary:90,involuntary:90,cause:0,retirement:365,death:365};
+const TCOL={RSU:'#185FA5',Options:'#c0392b',RSA:'#854F0B',ESPP:'#2D6A0E'};
+const TLAB={voluntary:'Voluntary resignation',involuntary:'Involuntary (without cause)',cause:'Involuntary (with cause)',retirement:'Retirement',death:'Death / Disability'};
+
+function fd(s){return new Date(s+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
+function ad(s,d){const dt=new Date(s+'T00:00:00');dt.setDate(dt.getDate()+d);return dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
+function fn(n){return Math.round(n).toLocaleString();}
+function fu(n){return '$'+Math.round(n).toLocaleString();}
+
+function calcG(g,tds,tt){
+  const td=new Date(tds+'T00:00:00');
+  let v=0,u=0;
+  g.vestSchedule.forEach(x=>{new Date(x.date+'T00:00:00')<=td?v+=x.shares:u+=x.shares;});
+  let act='standard';
+  if(tt==='cause') act='cause';
+  else if(tt==='retirement'||tt==='death') act='accel';
+  let fv=v,ff=u;
+  if(act==='cause'){fv=0;ff=g.grantShares;}
+  if(act==='accel'){fv=g.grantShares;ff=0;}
+  return{...g,vested:fv,forfeited:ff,act,pct:Math.round(fv/g.grantShares*100)};
+}
+
+let charts={};
+function kc(){Object.values(charts).forEach(c=>c&&c.destroy());charts={};}
+
+function swt(id,btn){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('pane-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+function go(){
+  const tds=document.getElementById('tDate').value;
+  const tt=document.getElementById('tType').value;
+  const sp=parseFloat(document.getElementById('sPrice').value)||42.50;
+  const pn=document.getElementById('pName').value||'Participant';
+  const hd=document.getElementById('hDate').value;
+  const pid=document.getElementById('pId').value;
+  if(!tds) return;
+
+  const R=GRANTS.map(g=>calcG(g,tds,tt));
+  const w=WIN[tt]||90;
+  const nonE=R.filter(r=>r.type!=='ESPP');
+  const totV=nonE.reduce((a,r)=>a+r.vested,0);
+  const totF=nonE.reduce((a,r)=>a+r.forfeited,0);
+  const fval=totF*sp;
+  const opts=R.filter(r=>r.type==='Options');
+
+  document.getElementById('kv').textContent=fn(totV);
+  document.getElementById('kf').textContent=fn(totF);
+  document.getElementById('kval').textContent=fu(fval);
+  document.getElementById('kg').textContent=R.length;
+  document.getElementById('kw').textContent=w===0?'None':w+' days';
+  document.getElementById('kws').textContent=tt==='cause'?'All options cancelled':'Vested options';
+
+  function abadge(act,type){
+    if(type==='ESPP') return ['b-g','Contributions refunded'];
+    if(act==='cause') return ['b-r','All forfeited'];
+    if(act==='accel') return ['b-g','Accelerated vest'];
+    return ['b-b','Standard'];
+  }
+
+  document.getElementById('gGrid').innerHTML=R.map(r=>{
+    const [bc,bl]=abadge(r.act,r.type);
+    const bc2=r.pct===100?'#2D6A0E':r.pct===0?'#c0392b':'#185FA5';
+    const isOpt=r.type==='Options', isEspp=r.type==='ESPP';
+    const sp0=r.strikePrice||18;
+    return `<div class="gc">
+      <div class="gh"><div><div class="gn">${r.id} — ${r.type}</div><div class="gt">${r.plan} &middot; ${fd(r.grantDate)}</div></div><span class="bx ${bc}">${bl}</span></div>
+      <div class="vbb"><div class="vbf" style="width:${r.pct}%;background:${bc2}"></div></div>
+      <div class="vl"><span>${r.pct}% vested</span><span>${fn(r.grantShares)} total shares</span></div>
+      <div class="dr"><span>Vested shares</span><span class="pos">${fn(r.vested)}</span></div>
+      ${!isEspp?`<div class="dr"><span>Forfeited (unvested)</span><span class="neg">&minus;${fn(r.forfeited)}</span></div>`:''}
+      ${isOpt?`<div class="dr"><span>Strike price</span><span class="bold">$${sp0.toFixed(2)}</span></div>`:''}
+      ${isOpt?`<div class="dr"><span>In the money?</span><span class="${sp>sp0?'pos':'neg'}">${sp>sp0?'Yes &mdash; '+fu((sp-sp0)*r.vested)+' intrinsic':'No'}</span></div>`:''}
+      ${isOpt?`<div class="dr"><span>Exercise deadline</span><span class="bold">${w===0?'Immediately cancelled':ad(tds,w)}</span></div>`:''}
+      ${isEspp?`<div class="dr"><span>Action</span><span style="color:#7A4A0A;font-weight:600">Contributions refunded</span></div>`:''}
+      ${!isEspp?`<div class="dr"><span>Forfeiture value</span><span class="neg">&minus;${fu(r.forfeited*sp)}</span></div>`:''}
+    </div>`;
+  }).join('');
+
+  kc();
+
+  charts.split=new Chart(document.getElementById('cSplit'),{type:'bar',
+    data:{labels:nonE.map(r=>r.id),datasets:[{label:'Vested',data:nonE.map(r=>r.vested),backgroundColor:'#185FA5',borderRadius:4,stack:'s'},{label:'Forfeited',data:nonE.map(r=>r.forfeited),backgroundColor:'#c0392b',borderRadius:4,stack:'s'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},y:{stacked:true,ticks:{font:{size:10}},grid:{color:'#eee'}}}}});
+
+  const byT={};
+  nonE.forEach(r=>{byT[r.type]=(byT[r.type]||0)+r.forfeited;});
+  charts.type=new Chart(document.getElementById('cType'),{type:'doughnut',
+    data:{labels:Object.keys(byT),datasets:[{data:Object.values(byT),backgroundColor:Object.keys(byT).map(t=>TCOL[t]),borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:11,padding:10}}},cutout:'58%'}});
+
+  charts.plan=new Chart(document.getElementById('cPlan'),{type:'bar',
+    data:{labels:['RSU','RSA','Options','ESPP'],datasets:[{data:[7.2,5.8,11.4,4.1],backgroundColor:['#185FA5','#854F0B','#c0392b','#2D6A0E'],borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#eee'}}}}});
+
+  const rsaF=R.filter(r=>r.type==='RSA').reduce((a,r)=>a+r.forfeited,0);
+  document.getElementById('issDet').innerHTML=`
+    <div class="dr"><span>RSU vested (shares issued)</span><span class="pos">${fn(R.filter(r=>r.type==='RSU').reduce((a,r)=>a+r.vested,0))}</span></div>
+    <div class="dr"><span>RSU unvested &rarr; returned to pool</span><span class="neg">&minus;${fn(R.filter(r=>r.type==='RSU').reduce((a,r)=>a+r.forfeited,0))}</span></div>
+    <div class="dr"><span>RSA unvested &rarr; company repurchase</span><span class="neg">&minus;${fn(rsaF)}</span></div>
+    <div class="dr"><span>Options vested (exercisable)</span><span class="pos">${fn(opts.reduce((a,r)=>a+r.vested,0))}</span></div>
+    <div class="dr"><span>Options cancelled (unvested)</span><span class="neg">&minus;${fn(opts.reduce((a,r)=>a+r.forfeited,0))}</span></div>
+    <div class="dr"><span>ESPP contributions</span><span style="color:#7A4A0A;font-weight:600">Cash refunded</span></div>
+    <div class="dr"><span>Net shares returned to pool</span><span class="pos">+${fn(totF)}</span></div>`;
+
+  document.getElementById('exDet').innerHTML=opts.length?opts.map(r=>`
+    <div class="dr"><span>${r.id} &mdash; vested options</span><span class="bold">${fn(r.vested)} shares</span></div>
+    <div class="dr"><span>Exercise window</span><span class="bold">${w===0?'None (cause)':w+' days'}</span></div>
+    <div class="dr"><span>Exercise deadline</span><span class="bold">${w===0?'&mdash;':ad(tds,w)}</span></div>
+    <div class="dr"><span>Strike / current price</span><span class="bold">$${(r.strikePrice||18).toFixed(2)} / $${sp.toFixed(2)}</span></div>
+    <div class="dr"><span>Status</span><span class="${sp>(r.strikePrice||18)?'pos':'neg'}">${sp>(r.strikePrice||18)?'In the money':'Out of the money'}</span></div>
+  `).join(''):'<div style="font-size:12px;color:#888;padding:6px 0">No option grants for this participant.</div>';
+
+  const steps=[
+    {c:'#185FA5',bg:'#dbeeff',n:'1',title:'Termination event recorded',
+      desc:`${pn} (${pid}) is terminated on ${fd(tds)} — type: <strong>${TLAB[tt]}</strong>. All future vesting halts immediately on the termination date. No additional vest events will process after this date.`,
+      rows:[['Hire date',fd(hd)],['Termination date',fd(tds)],['Termination type',TLAB[tt]],['Stock price on term date',fu(sp)],['Service length',Math.floor((new Date(tds)-new Date(hd))/(365.25*24*3600*1000)*10)/10+' years']]},
+    {c:'#185FA5',bg:'#dbeeff',n:'2',title:'RSU grants evaluated',
+      desc:'Each RSU grant is assessed as of the termination date. Shares that have already vested are already issued to the participant and are retained. Unvested RSU shares are forfeited and returned to the plan pool.',
+      rows:R.filter(r=>r.type==='RSU').length?R.filter(r=>r.type==='RSU').map(r=>[`${r.id} — vested / forfeited`,`${fn(r.vested)} retained / \u2212${fn(r.forfeited)} forfeited`]):[['No RSU grants','—']]},
+    {c:'#854F0B',bg:'#feebc8',n:'3',title:'RSA grants evaluated',
+      desc:'RSA (Restricted Stock Awards) shares are already issued to the participant but subject to a company repurchase right. Unvested RSA shares are repurchased by the company — typically at the original grant price or $0.001 par value depending on the plan terms.',
+      rows:R.filter(r=>r.type==='RSA').length?R.filter(r=>r.type==='RSA').map(r=>[`${r.id} — vested / repurchased`,`${fn(r.vested)} retained / \u2212${fn(r.forfeited)} repurchased`]):[['No RSA grants','—']]},
+    {c:'#8B2020',bg:'#ffe0e0',n:'4',title:'Stock options evaluated',
+      desc:tt==='cause'?'Termination for cause: ALL option grants — both vested and unvested — are immediately cancelled. No post-termination exercise window is granted per plan terms.':`Unvested options are cancelled immediately. Vested options enter a ${w}-day post-termination exercise window. Any options not exercised before the deadline will expire worthless.`,
+      rows:opts.length?[...opts.map(r=>[`${r.id} vested options`,`${fn(r.vested)} shares exercisable`]),['Exercise window',w===0?'None (termination for cause)':w+' days'],['Exercise deadline',w===0?'Cancelled immediately':ad(tds,w)],['Option status',sp>18?`In the money — ${fu((sp-18)*opts.reduce((a,r)=>a+r.vested,0))} total intrinsic value`:'Out of the money']]:[['No option grants','—']]},
+    {c:'#2D6A0E',bg:'#d6f0c8',n:'5',title:'ESPP evaluated',
+      desc:'Participants who exit mid-offering period have their accumulated payroll contributions refunded in cash. No shares are purchased for the current offering period. Shares from prior completed purchase periods are already issued and fully retained by the participant.',
+      rows:[['Current offering period','Cancelled — no purchase executed'],['Accumulated contributions','Refunded to participant in cash'],['Prior period ESPP shares','Already issued — retained by participant'],['Section 423 impact','Qualifying disposition rules no longer apply to future purchases']]},
+    {c:'#185FA5',bg:'#dbeeff',n:'6',title:'Share issuance & plan pool updated',
+      desc:`${fn(totF)} forfeited shares are returned to the plan reserve pool and become immediately available for future grants. RSA repurchase is processed. The equity register is updated to reflect all termination impacts.`,
+      rows:[['RSU/RSA returned to pool',`+${fn(R.filter(r=>r.type!=='Options'&&r.type!=='ESPP').reduce((a,r)=>a+r.forfeited,0))} shares`],['Options cancelled (unvested)',`+${fn(opts.reduce((a,r)=>a+r.forfeited,0))} to pool`],['ESPP','Cash refund — no pool impact'],['Total net pool increase',`+${fn(totF)} shares`]]},
+    {c:'#555',bg:'#ece9e0',n:'7',title:'Compliance & reporting',
+      desc:'Tax withholding obligations, Section 409A considerations, and Section 423 ESPP rules are reviewed. Participant receives an equity termination statement. The broker/custodian is notified of any option expiry dates.',
+      rows:[['RSU tax event','Already taxed at vest — no additional withholding event'],['Options — if exercised','Taxable on spread at exercise (NQO / ISO rules apply)'],['ESPP refund','Non-taxable return of contributions'],['Equity statement issued',ad(tds,2)],['Broker notification',ad(tds,5)]]}
+  ];
+
+  document.getElementById('stepsCont').innerHTML=steps.map(s=>`
+    <div class="step">
+      <div class="sl"><div class="sn" style="background:${s.bg};color:${s.c}">${s.n}</div><div class="sline"></div></div>
+      <div class="sb">
+        <div class="stit">${s.title}</div>
+        <div class="sdesc">${s.desc}</div>
+        <div class="sdet">${s.rows.map(([l,v])=>`<div class="sr"><span>${l}</span><span>${v}</span></div>`).join('')}</div>
+      </div>
+    </div>`).join('');
+
+  const evts=[
+    {date:fd(hd),color:'#185FA5',text:`${pn} hired — equity grants begin`,cls:''},
+    ...nonE.filter(r=>r.vested>0).map(r=>({date:fd(tds),color:'#185FA5',text:`${r.id} (${r.type}): ${fn(r.vested)} vested shares retained`,cls:'pos'})),
+    {date:fd(tds),color:'#c0392b',text:`Termination — vesting halts (${TLAB[tt]})`,cls:'neg'},
+    {date:fd(tds),color:'#c0392b',text:`${fn(totF)} unvested shares forfeited — ${fu(fval)}`,cls:'neg'},
+    {date:fd(tds),color:'#2D6A0E',text:'ESPP contributions refunded to participant in cash',cls:''},
+    {date:fd(tds),color:'#185FA5',text:`${fn(totF)} shares returned to plan pool`,cls:'pos'},
+    {date:ad(tds,2),color:'#555',text:'Equity termination statement issued to participant',cls:''},
+  ];
+  if(opts.length){
+    if(w>0) evts.push({date:ad(tds,w),color:'#854F0B',text:`Option exercise window closes — ${w} days post-termination`,cls:'amb'});
+    else evts.push({date:fd(tds),color:'#c0392b',text:'All vested options cancelled immediately (termination for cause)',cls:'neg'});
+  }
+  evts.push({date:ad(tds,5),color:'#555',text:'Broker / custodian notified of option expiry date',cls:''});
+  evts.sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  document.getElementById('tlCont').innerHTML=evts.map(e=>`
+    <div class="ti">
+      <div class="td2" style="background:${e.color}"></div>
+      <div class="tdate">${e.date}</div>
+      <div class="ttxt ${e.cls}">${e.text}</div>
+    </div>`).join('');
+
+  document.getElementById('res').classList.remove('hid');
+}
+go();
+</script>
+</body>
+</html>
